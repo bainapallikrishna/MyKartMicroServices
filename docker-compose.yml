@@ -1,0 +1,54 @@
+﻿version: '3.8'
+
+services:
+  productservicedb:
+    container_name: ProductServiceDB
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    ports:
+      - "8002:1433"
+    environment:
+      - ACCEPT_EULA=Y
+      - MSSQL_SA_PASSWORD=seSSion@12
+    networks:
+      - microservicesnetwork
+
+  purchaseservicedb:
+    container_name: PurchaseServiceDB
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    ports:
+      - "7002:1433"
+    environment:
+      - ACCEPT_EULA=Y
+      - MSSQL_SA_PASSWORD=seSSion@12
+    networks:
+      - microservicesnetwork
+
+  productmicroservices:
+    container_name: productmicroservices
+    build:
+      context: .
+      dockerfile: ProductMicroservices/Dockerfile
+    ports:
+      - "8001:8080"
+    depends_on:
+      - productservicedb
+    networks:
+      - microservicesnetwork
+
+  purchasemicroservices:
+    container_name: purchasemicroservices
+    build:
+      context: .
+      dockerfile: PurchaseMicroservices/Dockerfile
+    ports:
+      - "7001:8080"
+    depends_on:
+      - purchaseservicedb
+      - productmicroservices
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+    networks:
+      - microservicesnetwork
+
+networks:
+  microservicesnetwork:
