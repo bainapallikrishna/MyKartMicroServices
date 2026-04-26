@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace UserMicroservices.Migrations
 {
     /// <inheritdoc />
-    public partial class CreateNewUserDB : Migration
+    public partial class usermicroservice : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)

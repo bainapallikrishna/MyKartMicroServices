@@ -21,8 +21,17 @@ namespace UserMicroservices
             builder.Services.AddSwaggerGen();
 
             builder.Services.AddDbContext<UserDBContext>(options =>
-       options.UseSqlServer(builder.Configuration.GetConnectionString("UserDBConnectionString")));
-
+               options.UseSqlServer(
+                   builder.Configuration.GetConnectionString("UserDBConnectionString"),
+                   sqlOptions =>
+                   {
+                       sqlOptions.EnableRetryOnFailure(
+                           maxRetryCount: 5,
+                           maxRetryDelay: TimeSpan.FromSeconds(30),
+                           errorNumbersToAdd: null
+                       );
+                   }
+               ));
             // Register repository as scoped (not singleton)
             builder.Services.AddScoped<UserRepository>();
             var app = builder.Build();

@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using MyKart.Contracts.Product;
 using PurchaseMicroservices.Models;
 using PurchaseMicroservices.Repository;
 using SharedLibrary.Common;
@@ -18,7 +19,17 @@ namespace PurchaseMicroservices
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
             builder.Services.AddDbContext<PurchaseDBContext>(options =>
-                options.UseSqlServer(builder.Configuration.GetConnectionString("PurchaseDBConnectionString")));
+                options.UseSqlServer(
+                    builder.Configuration.GetConnectionString("PurchaseDBConnectionString"),
+                    sqlOptions =>
+                    {
+                        sqlOptions.EnableRetryOnFailure(
+                            maxRetryCount: 5,
+                            maxRetryDelay: TimeSpan.FromSeconds(30),
+                            errorNumbersToAdd: null
+                        );
+                    }
+                ));
             builder.Services.AddScoped<PurchaseRepository>();
             builder.Services.AddHttpClient();
             builder.Services.AddGrpcClient<ProductGrpc.ProductGrpcClient>(options =>

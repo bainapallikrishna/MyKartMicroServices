@@ -11,8 +11,8 @@ using PurchaseMicroservices.Models;
 namespace PurchaseMicroservices.Migrations
 {
     [DbContext(typeof(PurchaseDBContext))]
-    [Migration("20260425145033_updateportdata")]
-    partial class updateportdata
+    [Migration("20260426134128_purchasecontext")]
+    partial class purchasecontext
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

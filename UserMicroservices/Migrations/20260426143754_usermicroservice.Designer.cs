@@ -12,8 +12,8 @@ using UserMicroservices.Models;
 namespace UserMicroservices.Migrations
 {
     [DbContext(typeof(UserDBContext))]
-    [Migration("20260426064355_usermigrate")]
-    partial class usermigrate
+    [Migration("20260426143754_usermicroservice")]
+    partial class usermicroservice
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

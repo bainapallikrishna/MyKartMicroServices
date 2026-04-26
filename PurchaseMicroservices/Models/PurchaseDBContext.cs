@@ -18,12 +18,17 @@ namespace PurchaseMicroservices.Models
                 var builder = new ConfigurationBuilder()
                     .SetBasePath(Directory.GetCurrentDirectory())
                     .AddJsonFile("appsettings.json");
-
                 var config = builder.Build();
-                var connectionString =
-                    config.GetConnectionString("PurchaseDBConnectionString");
+                var connectionString = config.GetConnectionString("PurchaseDBConnectionString");
 
-                optionsBuilder.UseSqlServer(connectionString);
+                optionsBuilder.UseSqlServer(connectionString, sqlOptions =>
+                {
+                    sqlOptions.EnableRetryOnFailure(
+                        maxRetryCount: 5,
+                        maxRetryDelay: TimeSpan.FromSeconds(30),
+                        errorNumbersToAdd: null
+                    );
+                });
             }
         }
 

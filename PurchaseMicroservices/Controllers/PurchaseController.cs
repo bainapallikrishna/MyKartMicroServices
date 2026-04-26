@@ -12,7 +12,7 @@ namespace PurchaseMicroservices.Controllers
     {
         public readonly PurchaseRepository _purchaseRepository;
         private readonly HttpClient _httpClient;
-        private readonly string _productServiceUrl;
+        private readonly string? _productServiceUrl;
         private readonly ProductGrpc.ProductGrpcClient _productGrpcClient;
 
         public PurchaseController(PurchaseRepository purchaseRepository,
