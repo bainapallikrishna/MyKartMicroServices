@@ -7,8 +7,22 @@
     <IsServiceFabricServiceProject>True</IsServiceFabricServiceProject>
     <UserSecretsId>PurchaseMicroservices-12345</UserSecretsId>
   </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Grpc.AspNetCore" Version="2.57.0" />
+    <PackageReference Include="Grpc.Tools" Version="2.57.0">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+    <PackageReference Include="Google.Protobuf" Version="3.27.0" />
+  </ItemGroup>
 
   <ItemGroup>
+    <Protobuf Include="..\Protos\product.proto" GrpcServices="Client" />
+    <Protobuf Include="..\Protos\user.proto" GrpcServices="Client" />
+    <Protobuf Include="..\Protos\category.proto" GrpcServices="Client" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Grpc.Net.ClientFactory" Version="2.76.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.0">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -25,12 +39,17 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\SharedLibrary\SharedLibrary.csproj" />
+    <ProjectReference Include="..\ProductMicroservices\ProductMicroservices.csproj" />
   </ItemGroup>
 
   <ItemGroup>
     <None Update=".dockerignore">
       <DependentUpon>Dockerfile</DependentUpon>
     </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Migrations\" />
   </ItemGroup>
 
 </Project>

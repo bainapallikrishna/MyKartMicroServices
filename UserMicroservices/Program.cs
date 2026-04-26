@@ -1,6 +1,8 @@
 using Microsoft.EntityFrameworkCore;
 using UserMicroservices.Models;
 using UserMicroservices.Repository;
+using UserMicroservices.Grpc;
+using SharedLibrary.Common;
 
 namespace UserMicroservices
 {
@@ -13,29 +15,40 @@ namespace UserMicroservices
             // Add services to the container.
 
             builder.Services.AddControllers();
+            builder.Services.AddGrpc();
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
 
-            builder.Services.AddSingleton<UserRepository>(
-                new UserRepository(
-                    new Models.UserDBContext(
-                        new DbContextOptions<UserDBContext>())));
+            builder.Services.AddDbContext<UserDBContext>(options =>
+               options.UseSqlServer(
+                   builder.Configuration.GetConnectionString("UserDBConnectionString"),
+                   sqlOptions =>
+                   {
+                       sqlOptions.EnableRetryOnFailure(
+                           maxRetryCount: 5,
+                           maxRetryDelay: TimeSpan.FromSeconds(30),
+                           errorNumbersToAdd: null
+                       );
+                   }
+               ));
+            // Register repository as scoped (not singleton)
+            builder.Services.AddScoped<UserRepository>();
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.
-            if (app.Environment.IsDevelopment())
-            {
-                app.UseSwagger();
-                app.UseSwaggerUI();
-            }
+            app.UseSwagger();
+            app.UseSwaggerUI();
 
             app.UseHttpsRedirection();
 
             app.UseAuthorization();
 
-
             app.MapControllers();
+            app.MapGrpcService<UserGrpcService>();
+
+            app.UseGlobalExceptionHandling();
+            app.UseRequestLogging();
 
             app.Run();
         }

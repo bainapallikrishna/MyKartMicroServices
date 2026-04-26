@@ -1,11 +1,9 @@
-﻿version: '3.8'
-
-services:
+﻿services:
   productservicedb:
     container_name: ProductServiceDB
     image: mcr.microsoft.com/mssql/server:2022-latest
     ports:
-      - "8002:1433"
+      - "18002:1433"
     environment:
       - ACCEPT_EULA=Y
       - MSSQL_SA_PASSWORD=seSSion@12
@@ -16,7 +14,29 @@ services:
     container_name: PurchaseServiceDB
     image: mcr.microsoft.com/mssql/server:2022-latest
     ports:
-      - "7002:1433"
+      - "17002:1433"
+    environment:
+      - ACCEPT_EULA=Y
+      - MSSQL_SA_PASSWORD=seSSion@12
+    networks:
+      - microservicesnetwork
+
+  categoryservicedb:
+    container_name: CategoryServiceDB
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    ports:
+      - "16002:1433"
+    environment:
+      - ACCEPT_EULA=Y
+      - MSSQL_SA_PASSWORD=seSSion@12
+    networks:
+      - microservicesnetwork
+
+  userservicedb:
+    container_name: UserServiceDB
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    ports:
+      - "15002:1433"
     environment:
       - ACCEPT_EULA=Y
       - MSSQL_SA_PASSWORD=seSSion@12
@@ -29,9 +49,12 @@ services:
       context: .
       dockerfile: ProductMicroservices/Dockerfile
     ports:
-      - "8001:8080"
+      - "18001:8080"
     depends_on:
       - productservicedb
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:8080
     networks:
       - microservicesnetwork
 
@@ -41,12 +64,61 @@ services:
       context: .
       dockerfile: PurchaseMicroservices/Dockerfile
     ports:
-      - "7001:8080"
+      - "17001:8080"
     depends_on:
       - purchaseservicedb
       - productmicroservices
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:8080
+    networks:
+      - microservicesnetwork
+
+  categorymicroservices:
+    container_name: categorymicroservices
+    build:
+      context: .
+      dockerfile: CategoryMicroservices/Dockerfile
+    ports:
+      - "16001:8080"
+    depends_on:
+      - categoryservicedb
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:8080
+    networks:
+      - microservicesnetwork
+
+  usermicroservices:
+    container_name: usermicroservices
+    build:
+      context: .
+      dockerfile: UserMicroservices/Dockerfile
+    ports:
+      - "15001:8080"
+    depends_on:
+      - userservicedb
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:8080
+    networks:
+      - microservicesnetwork
+
+  apigateway:
+    container_name: apigateway
+    build:
+      context: .
+      dockerfile: ApiGateway/Dockerfile
+    ports:
+      - "19000:8080"
+    depends_on:
+      - productmicroservices
+      - purchasemicroservices
+      - categorymicroservices
+      - usermicroservices
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:8080
     networks:
       - microservicesnetwork
 

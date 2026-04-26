@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using MyKart.Contracts.Product;
 using PurchaseMicroservices.Models;
 using PurchaseMicroservices.Repository;
 
@@ -11,14 +12,19 @@ namespace PurchaseMicroservices.Controllers
     {
         public readonly PurchaseRepository _purchaseRepository;
         private readonly HttpClient _httpClient;
-        private readonly string _productServiceUrl;
+        private readonly string? _productServiceUrl;
+        private readonly ProductGrpc.ProductGrpcClient _productGrpcClient;
 
         public PurchaseController(PurchaseRepository purchaseRepository,
-             PurchaseDBContext context, HttpClient httpClient, IConfiguration configuration)
+             PurchaseDBContext context,
+             HttpClient httpClient,
+             IConfiguration configuration,
+             ProductGrpc.ProductGrpcClient productGrpcClient)
         {
             _purchaseRepository = purchaseRepository;
             _httpClient = httpClient;
             _productServiceUrl = configuration.GetValue<string>("ProductServiceUrl");
+            _productGrpcClient = productGrpcClient;
         }
         [HttpGet]
         public IActionResult GetAllProducts()
@@ -27,7 +33,7 @@ namespace PurchaseMicroservices.Controllers
             return Ok(listOfPurchase);
         }
 
-        [HttpPost]
+        [HttpPost("product")]
         public IActionResult AddNewProduct(Purchase purchase)
         {
             bool status = _purchaseRepository.AddNewProduct(purchase);
@@ -40,7 +46,7 @@ namespace PurchaseMicroservices.Controllers
                 return BadRequest("Failed to add product");
             }
         }
-        [HttpPost]
+        [HttpPut("product")]
         public IActionResult UpdateProductDetails(Purchase purchase)
         {
             int status = _purchaseRepository.UpdateProductDetails(purchase);
@@ -57,7 +63,7 @@ namespace PurchaseMicroservices.Controllers
                 return BadRequest("Failed to update product details");
             }
         }
-        [HttpDelete]
+        [HttpDelete("product")]
         public IActionResult DeleteProduct(string PurchaseId)
         {
             bool status = _purchaseRepository.DeleteProduct(PurchaseId);
@@ -70,7 +76,7 @@ namespace PurchaseMicroservices.Controllers
                 return NotFound("Product not found");
             }
         }
-        [HttpPost]
+        [HttpPost("purchase")]
         public async Task<JsonResult> AddPurchase(Purchase purchase)
         {
             string result = "";
@@ -78,45 +84,36 @@ namespace PurchaseMicroservices.Controllers
             try
             {
                 double priceOfProduct = 0;
-                HttpResponseMessage priceResponse = await _httpClient
-                    .GetAsync($"{_productServiceUrl}/api/Product/GetPrice?productId={purchase.ProductId}");
-                if (priceResponse.IsSuccessStatusCode)
-                {
-                    priceOfProduct = Convert.ToDouble(await priceResponse.Content.ReadAsStringAsync());
-                }
+                var priceReply = await _productGrpcClient.GetPriceAsync(new GetPriceRequest { ProductId = purchase.ProductId });
+                priceOfProduct = priceReply.Price;
                 if (priceOfProduct > 0)
                 {
-                    HttpResponseMessage updateQuantitytResponse = await
-                        _httpClient.PutAsJsonAsync($"{_productServiceUrl}/api/Product/UpdateQuantity" +
-                        $"?productId={purchase.ProductId}&quantityPurchased={purchase.QuantityPurchased}",
-                        new { });
-                    if (updateQuantitytResponse.IsSuccessStatusCode)
+                    var updateReply = await _productGrpcClient.UpdateQuantityAsync(new UpdateQuantityRequest
                     {
-                        if (Convert.ToInt32(await updateQuantitytResponse.Content.ReadAsStringAsync()) == 1)
+                        ProductId = purchase.ProductId,
+                        QuantityPurchased = purchase.QuantityPurchased
+                    });
+
+                    if (updateReply.Result == 1)
+                    {
+                        purchase.TotalPrice = (decimal)(purchase.QuantityPurchased * priceOfProduct);
+                        status = await _purchaseRepository.AddPurchaseDetails(purchase);
+                        if (status == true)
                         {
-                            purchase.TotalPrice = (decimal)(purchase.QuantityPurchased * priceOfProduct);
-                            status = await _purchaseRepository.AddPurchaseDetails(purchase);
-                            if (status == true)
-                            {
-                                result = "Successfully added purchase details!";
-                            }
-                            else if (status == false)
-                            {
-                                result = "Purchase details could not be added!";
-                            }
-                            else
-                            {
-                                result = "Some error occurred while storing purchase details!";
-                            }
+                            result = "Successfully added purchase details!";
+                        }
+                        else if (status == false)
+                        {
+                            result = "Purchase details could not be added!";
                         }
                         else
                         {
-                            result = "Some error occurred while updating the stock!";
+                            result = "Some error occurred while storing purchase details!";
                         }
                     }
                     else
                     {
-                        result = "Internal Server error while updating the stock!";
+                        result = "Some error occurred while updating the stock!";
                     }
                 }
                 else

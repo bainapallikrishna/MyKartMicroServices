@@ -83,7 +83,7 @@ namespace ProductMicroservices.Controllers
             decimal result = await _productRepository.GetPrice(productId);
             return Json(result);
         }
-        [HttpPut]
+        [HttpPut("Quantity")]
         public async Task<JsonResult> UpdateQuantity(string productId, int quantityPurchased)
         {
             int result = await _productRepository.UpdateQuantity(productId, quantityPurchased);

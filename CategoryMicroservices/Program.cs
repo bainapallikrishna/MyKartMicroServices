@@ -1,6 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Server.Kestrel.Core;
 using CategoryMicroservices.Models;
 using CategoryMicroservices.Repository;
+using CategoryMicroservices.Grpc;
 using SharedLibrary.Common;
 namespace CategoryMicroservices
 {
@@ -13,6 +15,7 @@ namespace CategoryMicroservices
             // Add services to the container.
 
             builder.Services.AddControllers();
+            builder.Services.AddGrpc();
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
@@ -24,14 +27,19 @@ namespace CategoryMicroservices
 
             // ✅ Register repository correctly
             builder.Services.AddScoped<CategoryRepository>();
+
+            builder.WebHost.ConfigureKestrel(options =>
+            {
+                options.ConfigureEndpointDefaults(listenOptions =>
+                {
+                    listenOptions.Protocols = HttpProtocols.Http1AndHttp2;
+                });
+            });
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.
-            if (app.Environment.IsDevelopment())
-            {
-                app.UseSwagger();
-                app.UseSwaggerUI();
-            }
+            app.UseSwagger();
+            app.UseSwaggerUI();
 
             app.UseHttpsRedirection();
 
@@ -40,6 +48,7 @@ namespace CategoryMicroservices
             app.UseGlobalExceptionHandling();
            app.UseRequestLogging();
             app.MapControllers();
+            app.MapGrpcService<CategoryGrpcService>();
 
             app.Run();
 

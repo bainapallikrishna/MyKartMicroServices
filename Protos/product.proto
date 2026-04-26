@@ -1,0 +1,28 @@
+syntax = "proto3";
+
+option csharp_namespace = "MyKart.Contracts.Product";
+
+package mykart.product.v1;
+
+service ProductGrpc {
+  rpc GetPrice (GetPriceRequest) returns (GetPriceResponse);
+  rpc UpdateQuantity (UpdateQuantityRequest) returns (UpdateQuantityResponse);
+}
+
+message GetPriceRequest {
+  string productId = 1;
+}
+
+message GetPriceResponse {
+  double price = 1;
+}
+
+message UpdateQuantityRequest {
+  string productId = 1;
+  int32 quantityPurchased = 2;
+}
+
+message UpdateQuantityResponse {
+  int32 result = 1;
+}
+

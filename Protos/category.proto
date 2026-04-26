@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+option csharp_namespace = "MyKart.Contracts.Category";
+
+package mykart.category.v1;
+
+service CategoryGrpc {
+  rpc GetCategoryById (GetCategoryByIdRequest) returns (GetCategoryReply);
+}
+
+message GetCategoryByIdRequest {
+  int32 categoryId = 1;
+}
+
+message GetCategoryReply {
+  int32 categoryId = 1;
+  string categoryName = 2;
+}
+

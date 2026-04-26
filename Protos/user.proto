@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+option csharp_namespace = "MyKart.Contracts.User";
+
+package mykart.user.v1;
+
+service UserGrpc {
+  rpc UserExists (UserExistsRequest) returns (UserExistsReply);
+}
+
+message UserExistsRequest {
+  string emailId = 1;
+}
+
+message UserExistsReply {
+  bool exists = 1;
+}
+

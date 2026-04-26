@@ -11,8 +11,8 @@ using PurchaseMicroservices.Models;
 namespace PurchaseMicroservices.Migrations
 {
     [DbContext(typeof(PurchaseDBContext))]
-    [Migration("20260218125024_InitialCreate")]
-    partial class InitialCreate
+    [Migration("20260426134128_purchasecontext")]
+    partial class purchasecontext
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -44,6 +44,7 @@ namespace PurchaseMicroservices.Migrations
                         .HasColumnType("int");
 
                     b.Property<decimal>("TotalPrice")
+                        .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
 
                     b.HasKey("PurchaseId");

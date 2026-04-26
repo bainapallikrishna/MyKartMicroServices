@@ -4,7 +4,7 @@ WORKDIR /app
 EXPOSE 8080
 
 # Build stage
-FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
 WORKDIR /src
 
 # Copy only csproj first (cache optimization)

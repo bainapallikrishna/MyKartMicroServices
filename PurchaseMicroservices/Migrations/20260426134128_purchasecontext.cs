@@ -7,7 +7,7 @@
 namespace PurchaseMicroservices.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialCreate : Migration
+    public partial class purchasecontext : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -21,7 +21,7 @@ namespace PurchaseMicroservices.Migrations
                     EmailId = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     ProductId = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     QuantityPurchased = table.Column<int>(type: "int", nullable: false),
-                    TotalPrice = table.Column<decimal>(type: "decimal(18,2)", nullable: false)
+                    TotalPrice = table.Column<decimal>(type: "decimal(18,2)", precision: 18, scale: 2, nullable: false)
                 },
                 constraints: table =>
                 {

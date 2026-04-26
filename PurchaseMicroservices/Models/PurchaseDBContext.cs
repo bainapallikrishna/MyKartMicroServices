@@ -18,17 +18,25 @@ namespace PurchaseMicroservices.Models
                 var builder = new ConfigurationBuilder()
                     .SetBasePath(Directory.GetCurrentDirectory())
                     .AddJsonFile("appsettings.json");
-
                 var config = builder.Build();
-                var connectionString =
-                    config.GetConnectionString("PurchaseDBConnectionString");
+                var connectionString = config.GetConnectionString("PurchaseDBConnectionString");
 
-                optionsBuilder.UseSqlServer(connectionString);
+                optionsBuilder.UseSqlServer(connectionString, sqlOptions =>
+                {
+                    sqlOptions.EnableRetryOnFailure(
+                        maxRetryCount: 5,
+                        maxRetryDelay: TimeSpan.FromSeconds(30),
+                        errorNumbersToAdd: null
+                    );
+                });
             }
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            modelBuilder.Entity<Purchase>()
+.Property(p => p.TotalPrice)
+.HasPrecision(18, 2);
             modelBuilder.Entity<Purchase>().HasData(
                new Purchase { PurchaseId = 1, EmailId = "test1@gmail.com", ProductId = "P001", QuantityPurchased = 2, TotalPrice = 19.98m },
                 new Purchase { PurchaseId = 2, EmailId = "test2@gmail.com", ProductId = "P002", QuantityPurchased = 1, TotalPrice = 9.99m },
