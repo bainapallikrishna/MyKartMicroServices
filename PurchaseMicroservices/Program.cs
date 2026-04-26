@@ -1,8 +1,8 @@
-
 using Microsoft.EntityFrameworkCore;
 using PurchaseMicroservices.Models;
 using PurchaseMicroservices.Repository;
 using SharedLibrary.Common;
+
 namespace PurchaseMicroservices
 {
     public class Program
@@ -20,6 +20,12 @@ namespace PurchaseMicroservices
             builder.Services.AddDbContext<PurchaseDBContext>(options =>
                 options.UseSqlServer(builder.Configuration.GetConnectionString("PurchaseDBConnectionString")));
             builder.Services.AddScoped<PurchaseRepository>();
+            builder.Services.AddHttpClient();
+            builder.Services.AddGrpcClient<ProductGrpc.ProductGrpcClient>(options =>
+            {
+                var address = builder.Configuration.GetValue<string>("Grpc:ProductService");
+                options.Address = new Uri(address);
+            });
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.

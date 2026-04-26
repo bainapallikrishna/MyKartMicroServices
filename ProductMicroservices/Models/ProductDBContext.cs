@@ -22,10 +22,7 @@ namespace ProductMicroservices.Models
                     {
                         databaseCreater.Create();
                     }
-                    if (!databaseCreater.HasTables())
-                    {
-                        databaseCreater.CreateTables();
-                    }
+                   
                 }
             }
             catch (Exception ex)
@@ -56,7 +53,11 @@ namespace ProductMicroservices.Models
             modelBuilder.Entity<Product>()
                 .HasOne(p => p.Category)
                 .WithMany(c => c.Products)
+
                 .HasForeignKey(p => p.CategoryId);
+            modelBuilder.Entity<Product>()
+     .Property(p => p.Price)
+     .HasPrecision(18, 2);
 
             // seed categories consistent with other microservice
             modelBuilder.Entity<Category>().HasData(
