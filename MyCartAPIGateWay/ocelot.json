@@ -1,0 +1,101 @@
+{
+  "Routes": [
+    {
+      "DownstreamPathTemplate": "/api/{everything}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "categorymicroservices",
+          "Port": 8080
+        }
+      ],
+      "UpstreamPathTemplate": "/category/{everything}",
+      "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ],
+      "SwaggerKey": "CategoryService"
+    },
+    {
+      "DownstreamPathTemplate": "/api/{everything}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "productmicroservices",
+          "Port": 8080
+        }
+      ],
+      "UpstreamPathTemplate": "/product/{everything}",
+      "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ],
+      "SwaggerKey": "ProductService"
+    },
+    {
+      "DownstreamPathTemplate": "/api/{everything}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "usermicroservices",
+          "Port": 8080
+        }
+      ],
+      "UpstreamPathTemplate": "/user/{everything}",
+      "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ],
+      "SwaggerKey": "UserService"
+    },
+    {
+      "DownstreamPathTemplate": "/api/{everything}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "purchasemicroservices",
+          "Port": 8080
+        }
+      ],
+      "UpstreamPathTemplate": "/purchase/{everything}",
+      "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ],
+      "SwaggerKey": "PurchaseService"
+    }
+  ],
+  "SwaggerEndPoints": [
+    {
+      "Key": "CategoryService",
+      "Config": [
+        {
+          "Name": "Category Service",
+          "Version": "v1",
+          "Url": "http://categorymicroservices:8080/swagger/v1/swagger.json"
+        }
+      ]
+    },
+    {
+      "Key": "ProductService",
+      "Config": [
+        {
+          "Name": "Product Service",
+          "Version": "v1",
+          "Url": "http://productmicroservices:8080/swagger/v1/swagger.json"
+        }
+      ]
+    },
+    {
+      "Key": "UserService",
+      "Config": [
+        {
+          "Name": "User Service",
+          "Version": "v1",
+          "Url": "http://usermicroservices:8080/swagger/v1/swagger.json"
+        }
+      ]
+    },
+    {
+      "Key": "PurchaseService",
+      "Config": [
+        {
+          "Name": "Purchase Service",
+          "Version": "v1",
+          "Url": "http://purchasemicroservices:8080/swagger/v1/swagger.json"
+        }
+      ]
+    }
+  ],
+  "GlobalConfiguration": {
+    "BaseUrl": "http://localhost:19000"
+  }
+}

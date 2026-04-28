@@ -38,7 +38,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\SharedLibrary\SharedLibrary.csproj" />
+    <ProjectReference Include="..\SharedLibrary\SharedLibrary.csproj" />
     <ProjectReference Include="..\ProductMicroservices\ProductMicroservices.csproj" />
   </ItemGroup>
 

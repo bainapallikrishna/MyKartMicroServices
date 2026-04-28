@@ -43,6 +43,21 @@
     networks:
       - microservicesnetwork
 
+  categorymicroservices:
+    container_name: categorymicroservices
+    build:
+      context: .
+      dockerfile: CategoryMicroservices/Dockerfile
+    ports:
+      - "16001:8080"
+    depends_on:
+      - categoryservicedb
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:8080
+    networks:
+      - microservicesnetwork
+
   productmicroservices:
     container_name: productmicroservices
     build:
@@ -52,6 +67,21 @@
       - "18001:8080"
     depends_on:
       - productservicedb
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:8080
+    networks:
+      - microservicesnetwork
+
+  usermicroservices:
+    container_name: usermicroservices
+    build:
+      context: .
+      dockerfile: UserMicroservices/Dockerfile
+    ports:
+      - "15001:8080"
+    depends_on:
+      - userservicedb
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_URLS=http://+:8080
@@ -74,48 +104,18 @@
     networks:
       - microservicesnetwork
 
-  categorymicroservices:
-    container_name: categorymicroservices
-    build:
-      context: .
-      dockerfile: CategoryMicroservices/Dockerfile
-    ports:
-      - "16001:8080"
-    depends_on:
-      - categoryservicedb
-    environment:
-      - ASPNETCORE_ENVIRONMENT=Development
-      - ASPNETCORE_URLS=http://+:8080
-    networks:
-      - microservicesnetwork
-
-  usermicroservices:
-    container_name: usermicroservices
-    build:
-      context: .
-      dockerfile: UserMicroservices/Dockerfile
-    ports:
-      - "15001:8080"
-    depends_on:
-      - userservicedb
-    environment:
-      - ASPNETCORE_ENVIRONMENT=Development
-      - ASPNETCORE_URLS=http://+:8080
-    networks:
-      - microservicesnetwork
-
   apigateway:
     container_name: apigateway
     build:
       context: .
-      dockerfile: ApiGateway/Dockerfile
+      dockerfile: MyCartAPIGateWay/Dockerfile
     ports:
       - "19000:8080"
     depends_on:
-      - productmicroservices
-      - purchasemicroservices
       - categorymicroservices
+      - productmicroservices
       - usermicroservices
+      - purchasemicroservices
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_URLS=http://+:8080

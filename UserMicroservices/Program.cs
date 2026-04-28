@@ -12,44 +12,38 @@ namespace UserMicroservices
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            // Add services to the container.
-
             builder.Services.AddControllers();
             builder.Services.AddGrpc();
-            // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
-            builder.Services.AddSwaggerGen();
-
             builder.Services.AddDbContext<UserDBContext>(options =>
                options.UseSqlServer(
                    builder.Configuration.GetConnectionString("UserDBConnectionString"),
-                   sqlOptions =>
-                   {
-                       sqlOptions.EnableRetryOnFailure(
-                           maxRetryCount: 5,
-                           maxRetryDelay: TimeSpan.FromSeconds(30),
-                           errorNumbersToAdd: null
-                       );
-                   }
+                   sqlOptions => sqlOptions.EnableRetryOnFailure(
+                       maxRetryCount: 5,
+                       maxRetryDelay: TimeSpan.FromSeconds(30),
+                       errorNumbersToAdd: null
+                   )
                ));
-            // Register repository as scoped (not singleton)
+
             builder.Services.AddScoped<UserRepository>();
+
+            // Fixed title — was showing "Purchase Service" for User
+            builder.Services.AddSwaggerGen(c =>
+            {
+                c.SwaggerDoc("v1", new() { Title = "User Service", Version = "v1" });
+            });
+
             var app = builder.Build();
 
-            // Configure the HTTP request pipeline.
+            // Always enable swagger
             app.UseSwagger();
             app.UseSwaggerUI();
-
-            app.UseHttpsRedirection();
-
+            // REMOVED UseHttpsRedirection
             app.UseAuthorization();
-
             app.MapControllers();
             app.MapGrpcService<UserGrpcService>();
-
             app.UseGlobalExceptionHandling();
             app.UseRequestLogging();
-
             app.Run();
         }
     }

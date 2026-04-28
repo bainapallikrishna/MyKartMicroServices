@@ -13,19 +13,19 @@ namespace CategoryMicroservices
             var builder = WebApplication.CreateBuilder(args);
 
             // Add services to the container.
-
             builder.Services.AddControllers();
             builder.Services.AddGrpc();
-            // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
-            builder.Services.AddSwaggerGen();
-            // ✅ Register DbContext properly
-            builder.Services.AddDbContext<CategoryDBContext>(options =>
-                options.UseSqlServer(
-                    builder.Configuration.GetConnectionString("CategoryDBConnectionString")
-                ));
 
-            // ✅ Register repository correctly
+            // Configure Swagger before Build
+            builder.Services.AddSwaggerGen(c =>
+            {
+                c.SwaggerDoc("v1", new() { Title = "Category Service", Version = "v1" });
+            });
+
+            builder.Services.AddDbContext<CategoryDBContext>(options =>
+                options.UseSqlServer(builder.Configuration.GetConnectionString("CategoryDBConnectionString")));
+
             builder.Services.AddScoped<CategoryRepository>();
 
             builder.WebHost.ConfigureKestrel(options =>
@@ -35,23 +35,19 @@ namespace CategoryMicroservices
                     listenOptions.Protocols = HttpProtocols.Http1AndHttp2;
                 });
             });
+
             var app = builder.Build();
 
-            // Configure the HTTP request pipeline.
+            // Configure middleware
             app.UseSwagger();
             app.UseSwaggerUI();
-
             app.UseHttpsRedirection();
-
             app.UseAuthorization();
-
             app.UseGlobalExceptionHandling();
-           app.UseRequestLogging();
+            app.UseRequestLogging();
             app.MapControllers();
             app.MapGrpcService<CategoryGrpcService>();
-
             app.Run();
-
         }
     }
 }

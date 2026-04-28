@@ -7,12 +7,20 @@ EXPOSE 8080
 FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
 WORKDIR /src
 
-# Copy only csproj first (cache optimization)
+# Copy csproj files first (cache optimization)
 COPY ["CategoryMicroservices/CategoryMicroservices.csproj", "CategoryMicroservices/"]
+COPY ["SharedLibrary/SharedLibrary.csproj", "SharedLibrary/"]
+
+# Restore
 RUN dotnet restore "CategoryMicroservices/CategoryMicroservices.csproj"
 
-# Copy everything else
-COPY . .
+# Copy source files
+COPY ["CategoryMicroservices/", "CategoryMicroservices/"]
+COPY ["SharedLibrary/", "SharedLibrary/"]
+
+# Copy Protos
+COPY ["Protos/", "Protos/"]
+
 WORKDIR "/src/CategoryMicroservices"
 RUN dotnet publish "CategoryMicroservices.csproj" -c Release -o /app/publish
 
@@ -21,4 +29,3 @@ FROM base AS final
 WORKDIR /app
 COPY --from=build /app/publish .
 ENTRYPOINT ["dotnet", "CategoryMicroservices.dll"]
-
