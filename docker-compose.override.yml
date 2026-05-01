@@ -1,5 +1,41 @@
 services:
+  categoryservicedb:
+    environment:
+      - ACCEPT_EULA=Y
+      - MSSQL_SA_PASSWORD=seSSion@12
+
+  productservicedb:
+    environment:
+      - ACCEPT_EULA=Y
+      - MSSQL_SA_PASSWORD=seSSion@12
+
+  userservicedb:
+    environment:
+      - ACCEPT_EULA=Y
+      - MSSQL_SA_PASSWORD=seSSion@12
+
+  purchaseservicedb:
+    environment:
+      - ACCEPT_EULA=Y
+      - MSSQL_SA_PASSWORD=seSSion@12
+
+  categorymicroservices:
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:8080
+    volumes:
+      - ${APPDATA}/Microsoft/UserSecrets:/root/.microsoft/usersecrets:ro
+      - ${APPDATA}/ASP.NET/Https:/root/.aspnet/https:ro
+
   productmicroservices:
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:8080
+    volumes:
+      - ${APPDATA}/Microsoft/UserSecrets:/root/.microsoft/usersecrets:ro
+      - ${APPDATA}/ASP.NET/Https:/root/.aspnet/https:ro
+
+  usermicroservices:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_URLS=http://+:8080
@@ -15,17 +51,10 @@ services:
       - ${APPDATA}/Microsoft/UserSecrets:/root/.microsoft/usersecrets:ro
       - ${APPDATA}/ASP.NET/Https:/root/.aspnet/https:ro
 
-  categorymicroservices:
-    environment:
-      - ASPNETCORE_ENVIRONMENT=Development
-      - ASPNETCORE_URLS=http://+:8080
-
-  usermicroservices:
-    environment:
-      - ASPNETCORE_ENVIRONMENT=Development
-      - ASPNETCORE_URLS=http://+:8080
-
   apigateway:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_URLS=http://+:8080
+    volumes:
+      - ${APPDATA}/Microsoft/UserSecrets:/root/.microsoft/usersecrets:ro
+      - ${APPDATA}/ASP.NET/Https:/root/.aspnet/https:ro

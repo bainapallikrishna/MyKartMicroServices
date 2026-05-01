@@ -12,6 +12,9 @@ namespace CategoryMicroservices
         {
             var builder = WebApplication.CreateBuilder(args);
 
+            // Ensure the app listens on HTTP port 8080 inside the container
+            builder.WebHost.UseUrls("http://*:8080");
+
             // Add services to the container.
             builder.Services.AddControllers();
             builder.Services.AddGrpc();
@@ -37,11 +40,27 @@ namespace CategoryMicroservices
             });
 
             var app = builder.Build();
-
+            using (var scope = app.Services.CreateScope())
+            {
+                var services = scope.ServiceProvider;
+                try
+                {
+                    var context = services.GetRequiredService<CategoryDBContext>();
+                    context.Database.Migrate();  // creates DB + runs all migrations automatically
+                }
+                catch (Exception ex)
+                {
+                    var logger = services.GetRequiredService<ILogger<Program>>();
+                    logger.LogError(ex, "An error occurred while migrating the database.");
+                }
+            }
             // Configure middleware
             app.UseSwagger();
             app.UseSwaggerUI();
-            app.UseHttpsRedirection();
+
+            // NOTE: Removed unconditional HTTPS redirection so internal HTTP calls from the API Gateway can fetch /swagger/v1/swagger.json
+            // app.UseHttpsRedirection();
+
             app.UseAuthorization();
             app.UseGlobalExceptionHandling();
             app.UseRequestLogging();

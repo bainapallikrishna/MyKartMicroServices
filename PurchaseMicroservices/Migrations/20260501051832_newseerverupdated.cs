@@ -2,10 +2,10 @@
 
 #nullable disable
 
-namespace ProductMicroservices.Migrations
+namespace PurchaseMicroservices.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialCreateFix : Migration
+    public partial class newseerverupdated : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)

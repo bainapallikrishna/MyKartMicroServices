@@ -11,8 +11,8 @@ using ProductMicroservices.Models;
 namespace ProductMicroservices.Migrations
 {
     [DbContext(typeof(ProductDBContext))]
-    [Migration("20260425125015_InitialCreateFix")]
-    partial class InitialCreateFix
+    [Migration("20260501064516_newupdateserver")]
+    partial class newupdateserver
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

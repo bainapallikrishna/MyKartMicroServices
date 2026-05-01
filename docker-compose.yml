@@ -9,6 +9,12 @@
       - MSSQL_SA_PASSWORD=seSSion@12
     networks:
       - microservicesnetwork
+    healthcheck:
+      test: ["CMD", "/opt/mssql-tools18/bin/sqlcmd", "-S", "localhost", "-U", "sa", "-P", "seSSion@12", "-Q", "SELECT 1", "-No"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
 
   purchaseservicedb:
     container_name: PurchaseServiceDB
@@ -20,6 +26,12 @@
       - MSSQL_SA_PASSWORD=seSSion@12
     networks:
       - microservicesnetwork
+    healthcheck:
+      test: ["CMD", "/opt/mssql-tools18/bin/sqlcmd", "-S", "localhost", "-U", "sa", "-P", "seSSion@12", "-Q", "SELECT 1", "-No"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
 
   categoryservicedb:
     container_name: CategoryServiceDB
@@ -31,6 +43,12 @@
       - MSSQL_SA_PASSWORD=seSSion@12
     networks:
       - microservicesnetwork
+    healthcheck:
+      test: ["CMD", "/opt/mssql-tools18/bin/sqlcmd", "-S", "localhost", "-U", "sa", "-P", "seSSion@12", "-Q", "SELECT 1", "-No"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
 
   userservicedb:
     container_name: UserServiceDB
@@ -42,6 +60,12 @@
       - MSSQL_SA_PASSWORD=seSSion@12
     networks:
       - microservicesnetwork
+    healthcheck:
+      test: ["CMD", "/opt/mssql-tools18/bin/sqlcmd", "-S", "localhost", "-U", "sa", "-P", "seSSion@12", "-Q", "SELECT 1", "-No"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
 
   categorymicroservices:
     container_name: categorymicroservices
@@ -51,9 +75,10 @@
     ports:
       - "16001:8080"
     depends_on:
-      - categoryservicedb
+      categoryservicedb:
+        condition: service_healthy
     environment:
-      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_ENVIRONMENT=Production
       - ASPNETCORE_URLS=http://+:8080
     networks:
       - microservicesnetwork
@@ -66,9 +91,10 @@
     ports:
       - "18001:8080"
     depends_on:
-      - productservicedb
+      productservicedb:
+        condition: service_healthy
     environment:
-      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_ENVIRONMENT=Production
       - ASPNETCORE_URLS=http://+:8080
     networks:
       - microservicesnetwork
@@ -81,9 +107,10 @@
     ports:
       - "15001:8080"
     depends_on:
-      - userservicedb
+      userservicedb:
+        condition: service_healthy
     environment:
-      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_ENVIRONMENT=Production
       - ASPNETCORE_URLS=http://+:8080
     networks:
       - microservicesnetwork
@@ -96,10 +123,12 @@
     ports:
       - "17001:8080"
     depends_on:
-      - purchaseservicedb
-      - productmicroservices
+      purchaseservicedb:
+        condition: service_healthy
+      productmicroservices:
+        condition: service_started
     environment:
-      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_ENVIRONMENT=Production
       - ASPNETCORE_URLS=http://+:8080
     networks:
       - microservicesnetwork
@@ -112,12 +141,16 @@
     ports:
       - "19000:8080"
     depends_on:
-      - categorymicroservices
-      - productmicroservices
-      - usermicroservices
-      - purchasemicroservices
+      categorymicroservices:
+        condition: service_started
+      productmicroservices:
+        condition: service_started
+      usermicroservices:
+        condition: service_started
+      purchasemicroservices:
+        condition: service_started
     environment:
-      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_ENVIRONMENT=Production
       - ASPNETCORE_URLS=http://+:8080
     networks:
       - microservicesnetwork

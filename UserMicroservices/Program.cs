@@ -1,4 +1,4 @@
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using UserMicroservices.Models;
 using UserMicroservices.Repository;
 using UserMicroservices.Grpc;
@@ -11,7 +11,6 @@ namespace UserMicroservices
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
-
             builder.Services.AddControllers();
             builder.Services.AddGrpc();
             builder.Services.AddEndpointsApiExplorer();
@@ -24,10 +23,7 @@ namespace UserMicroservices
                        errorNumbersToAdd: null
                    )
                ));
-
             builder.Services.AddScoped<UserRepository>();
-
-            // Fixed title � was showing "Purchase Service" for User
             builder.Services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new() { Title = "User Service", Version = "v1" });
@@ -35,10 +31,24 @@ namespace UserMicroservices
 
             var app = builder.Build();
 
-            // Always enable swagger
+            // ✅ Auto migrate on startup — same as CategoryService
+            using (var scope = app.Services.CreateScope())
+            {
+                var services = scope.ServiceProvider;
+                try
+                {
+                    var context = services.GetRequiredService<UserDBContext>();
+                    context.Database.Migrate();
+                }
+                catch (Exception ex)
+                {
+                    var logger = services.GetRequiredService<ILogger<Program>>();
+                    logger.LogError(ex, "An error occurred while migrating the database.");
+                }
+            }
+
             app.UseSwagger();
             app.UseSwaggerUI();
-            // REMOVED UseHttpsRedirection
             app.UseAuthorization();
             app.MapControllers();
             app.MapGrpcService<UserGrpcService>();

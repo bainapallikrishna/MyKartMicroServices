@@ -1,36 +1,21 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using System.Collections.Generic;
 
 namespace UserMicroservices.Models
 {
     public class UserDBContext : DbContext
     {
-        public UserDBContext() { }
-        public UserDBContext(DbContextOptions dbContextOptions) { }
+    
+        public UserDBContext(DbContextOptions<UserDBContext> options) : base(options) { }
+
         public DbSet<User> Users { get; set; }
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        {
-            var builder = new ConfigurationBuilder()
-                              .SetBasePath(Directory.GetCurrentDirectory())
-                              .AddJsonFile("appsettings.json");
-            var config = builder.Build();
-            var connectionString = config.GetConnectionString("UserDBConnectionString");
-            optionsBuilder.UseSqlServer(connectionString, sqlOptions =>
-            {
-                sqlOptions.EnableRetryOnFailure(
-                    maxRetryCount: 5,
-                    maxRetryDelay: TimeSpan.FromSeconds(30),
-                    errorNumbersToAdd: null
-                );
-            });
-        }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<User>().HasData(
                 new User
                 {
-                    EmailId = "Franken@gmail.com", 
-                    UserPassword = "Franken@785", 
+                    EmailId = "Franken@gmail.com",
+                    UserPassword = "Franken@785",
                     RoleName = "Admin",
                     Gender = 'M',
                     DateOfBirth = new DateTime(1978, 9, 10),
