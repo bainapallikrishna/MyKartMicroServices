@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Server.Kestrel.Core;
+using Microsoft.EntityFrameworkCore;
 using UserMicroservices.Models;
 using UserMicroservices.Repository;
 using UserMicroservices.Grpc;
@@ -14,6 +15,10 @@ namespace UserMicroservices
             builder.Services.AddControllers();
             builder.Services.AddGrpc();
             builder.Services.AddEndpointsApiExplorer();
+            builder.Services.AddSwaggerGen(c =>
+            {
+                c.SwaggerDoc("v1", new() { Title = "User Service", Version = "v1" });
+            });
             builder.Services.AddDbContext<UserDBContext>(options =>
                options.UseSqlServer(
                    builder.Configuration.GetConnectionString("UserDBConnectionString"),
@@ -24,9 +29,13 @@ namespace UserMicroservices
                    )
                ));
             builder.Services.AddScoped<UserRepository>();
-            builder.Services.AddSwaggerGen(c =>
+
+            builder.WebHost.ConfigureKestrel(options =>
             {
-                c.SwaggerDoc("v1", new() { Title = "User Service", Version = "v1" });
+                options.ConfigureEndpointDefaults(listenOptions =>
+                {
+                    listenOptions.Protocols = HttpProtocols.Http1AndHttp2;
+                });
             });
 
             var app = builder.Build();
@@ -47,13 +56,13 @@ namespace UserMicroservices
                 }
             }
 
+            app.UseGlobalExceptionHandling();
+            app.UseRequestLogging();
             app.UseSwagger();
             app.UseSwaggerUI();
             app.UseAuthorization();
             app.MapControllers();
             app.MapGrpcService<UserGrpcService>();
-            app.UseGlobalExceptionHandling();
-            app.UseRequestLogging();
             app.Run();
         }
     }

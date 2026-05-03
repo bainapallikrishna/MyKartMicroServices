@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.EntityFrameworkCore;
 using ProductMicroservices.Grpc;
 using ProductMicroservices.Models;
@@ -27,22 +28,36 @@ builder.Services.AddSwaggerGen(c =>
     c.SwaggerDoc("v1", new() { Title = "Product Service", Version = "v1" });
 });
 
+builder.WebHost.ConfigureKestrel(options =>
+{
+    options.ConfigureEndpointDefaults(listenOptions =>
+    {
+        listenOptions.Protocols = HttpProtocols.Http1AndHttp2;
+    });
+});
+
 var app = builder.Build();
 
 using (var scope = app.Services.CreateScope())
 {
-    var db = scope.ServiceProvider.GetRequiredService<ProductDBContext>();
-    try { db.Database.Migrate(); }
-    catch (Exception ex) { Console.WriteLine($"Migration failed: {ex.Message}"); }
+    var services = scope.ServiceProvider;
+    try
+    {
+        var db = services.GetRequiredService<ProductDBContext>();
+        db.Database.Migrate();
+    }
+    catch (Exception ex)
+    {
+        var logger = services.GetRequiredService<ILogger<Program>>();
+        logger.LogError(ex, "An error occurred while migrating the database.");
+    }
 }
 
-// Always enable swagger — not just in Development
+app.UseGlobalExceptionHandling();
+app.UseRequestLogging();
 app.UseSwagger();
 app.UseSwaggerUI();
-// REMOVED UseHttpsRedirection — Docker uses HTTP only
 app.UseAuthorization();
 app.MapControllers();
 app.MapGrpcService<ProductGrpcService>();
-app.UseGlobalExceptionHandling();
-app.UseRequestLogging();
 app.Run();
