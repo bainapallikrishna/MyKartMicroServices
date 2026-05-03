@@ -9,6 +9,9 @@
           "Port": 5124
         }
       ],
+      "HttpHandlerOptions": {
+        "DangerousAcceptAnyServerCertificateValidator": true
+      },
       "UpstreamPathTemplate": "/category/{everything}",
       "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ],
       "SwaggerKey": "CategoryService"
@@ -19,9 +22,12 @@
       "DownstreamHostAndPorts": [
         {
           "Host": "localhost",
-          "Port": 5135
+          "Port": 21464
         }
       ],
+      "HttpHandlerOptions": {
+        "DangerousAcceptAnyServerCertificateValidator": true
+      },
       "UpstreamPathTemplate": "/product/{everything}",
       "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ],
       "SwaggerKey": "ProductService"
@@ -32,9 +38,12 @@
       "DownstreamHostAndPorts": [
         {
           "Host": "localhost",
-          "Port": 5104
+          "Port": 35805
         }
       ],
+      "HttpHandlerOptions": {
+        "DangerousAcceptAnyServerCertificateValidator": true
+      },
       "UpstreamPathTemplate": "/user/{everything}",
       "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ],
       "SwaggerKey": "UserService"
@@ -45,9 +54,12 @@
       "DownstreamHostAndPorts": [
         {
           "Host": "localhost",
-          "Port": 5263
+          "Port": 47513
         }
       ],
+      "HttpHandlerOptions": {
+        "DangerousAcceptAnyServerCertificateValidator": true
+      },
       "UpstreamPathTemplate": "/purchase/{everything}",
       "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ],
       "SwaggerKey": "PurchaseService"
@@ -70,7 +82,7 @@
         {
           "Name": "Product Service",
           "Version": "v1",
-          "Url": "http://localhost:5135/swagger/v1/swagger.json"
+          "Url": "http://localhost:21464/swagger/v1/swagger.json"
         }
       ]
     },
@@ -80,7 +92,7 @@
         {
           "Name": "User Service",
           "Version": "v1",
-          "Url": "http://localhost:5104/swagger/v1/swagger.json"
+          "Url": "http://localhost:35805/swagger/v1/swagger.json"
         }
       ]
     },
@@ -90,12 +102,12 @@
         {
           "Name": "Purchase Service",
           "Version": "v1",
-          "Url": "http://localhost:5263/swagger/v1/swagger.json"
+          "Url": "http://localhost:47513/swagger/v1/swagger.json"
         }
       ]
     }
   ],
   "GlobalConfiguration": {
-    "BaseUrl": "http://localhost:5048"
+    "BaseUrl": "http://localhost:60123"
   }
 }

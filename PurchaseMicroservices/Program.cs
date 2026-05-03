@@ -14,6 +14,11 @@ namespace PurchaseMicroservices
 
             builder.Services.AddControllers();
             builder.Services.AddEndpointsApiExplorer();
+            // ADD before Build()
+            builder.Services.AddSwaggerGen(c =>
+            {
+                c.SwaggerDoc("v1", new() { Title = "Purchase Service", Version = "v1" });
+            });
             builder.Services.AddDbContext<PurchaseDBContext>(options =>
                 options.UseSqlServer(
                     builder.Configuration.GetConnectionString("PurchaseDBConnectionString"),
@@ -32,22 +37,29 @@ namespace PurchaseMicroservices
                 options.Address = new Uri(address);
             });
 
-            // ADD before Build()
-            builder.Services.AddSwaggerGen(c =>
-            {
-                c.SwaggerDoc("v1", new() { Title = "Purchase Service", Version = "v1" });
-            });
-
             var app = builder.Build();
 
-            // Always enable swagger
-            app.UseSwagger();
-            app.UseSwaggerUI();
-            // REMOVED UseHttpsRedirection
-            app.UseAuthorization();
-            app.MapControllers();
+            using (var scope = app.Services.CreateScope())
+            {
+                var services = scope.ServiceProvider;
+                try
+                {
+                    var context = services.GetRequiredService<PurchaseDBContext>();
+                    context.Database.Migrate();
+                }
+                catch (Exception ex)
+                {
+                    var logger = services.GetRequiredService<ILogger<Program>>();
+                    logger.LogError(ex, "An error occurred while migrating the database.");
+                }
+            }
+
             app.UseGlobalExceptionHandling();
             app.UseRequestLogging();
+            app.UseSwagger();
+            app.UseSwaggerUI();
+            app.UseAuthorization();
+            app.MapControllers();
             app.Run();
         }
     }
