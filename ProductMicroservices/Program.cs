@@ -7,6 +7,13 @@ using SharedLibrary.Common;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// ✅ Environment-aware config loading
+var env = builder.Environment.EnvironmentName;
+builder.Configuration
+    .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+    .AddJsonFile($"appsettings.{env}.json", optional: true, reloadOnChange: true)
+    .AddEnvironmentVariables();
+
 builder.Services.AddDbContext<ProductDBContext>(options =>
     options.UseLazyLoadingProxies()
            .UseSqlServer(

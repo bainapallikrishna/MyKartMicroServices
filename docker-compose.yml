@@ -14,7 +14,7 @@
       interval: 10s
       timeout: 5s
       retries: 10
-      start_period: 30s
+      start_period: 60s
 
   purchaseservicedb:
     container_name: PurchaseServiceDB
@@ -31,7 +31,7 @@
       interval: 10s
       timeout: 5s
       retries: 10
-      start_period: 30s
+      start_period: 60s
 
   categoryservicedb:
     container_name: CategoryServiceDB
@@ -48,7 +48,7 @@
       interval: 10s
       timeout: 5s
       retries: 10
-      start_period: 30s
+      start_period: 60s
 
   userservicedb:
     container_name: UserServiceDB
@@ -65,7 +65,7 @@
       interval: 10s
       timeout: 5s
       retries: 10
-      start_period: 30s
+      start_period: 60s
 
   categorymicroservices:
     container_name: categorymicroservices
@@ -73,15 +73,16 @@
       context: .
       dockerfile: CategoryMicroservices/Dockerfile
     ports:
-      - "16001:8080"
+      - "26001:8080"
     depends_on:
       categoryservicedb:
         condition: service_healthy
     environment:
-      - ASPNETCORE_ENVIRONMENT=Production
+      - ASPNETCORE_ENVIRONMENT=Docker
       - ASPNETCORE_URLS=http://+:8080
     networks:
       - microservicesnetwork
+    restart: on-failure
 
   productmicroservices:
     container_name: productmicroservices
@@ -89,15 +90,16 @@
       context: .
       dockerfile: ProductMicroservices/Dockerfile
     ports:
-      - "18001:8080"
+      - "28001:8080"
     depends_on:
       productservicedb:
         condition: service_healthy
     environment:
-      - ASPNETCORE_ENVIRONMENT=Production
+      - ASPNETCORE_ENVIRONMENT=Docker
       - ASPNETCORE_URLS=http://+:8080
     networks:
       - microservicesnetwork
+    restart: on-failure
 
   usermicroservices:
     container_name: usermicroservices
@@ -105,15 +107,16 @@
       context: .
       dockerfile: UserMicroservices/Dockerfile
     ports:
-      - "15001:8080"
+      - "25001:8080"
     depends_on:
       userservicedb:
         condition: service_healthy
     environment:
-      - ASPNETCORE_ENVIRONMENT=Production
+      - ASPNETCORE_ENVIRONMENT=Docker
       - ASPNETCORE_URLS=http://+:8080
     networks:
       - microservicesnetwork
+    restart: on-failure
 
   purchasemicroservices:
     container_name: purchasemicroservices
@@ -121,17 +124,18 @@
       context: .
       dockerfile: PurchaseMicroservices/Dockerfile
     ports:
-      - "17001:8080"
+      - "27001:8080"
     depends_on:
       purchaseservicedb:
         condition: service_healthy
       productmicroservices:
         condition: service_started
     environment:
-      - ASPNETCORE_ENVIRONMENT=Production
+      - ASPNETCORE_ENVIRONMENT=Docker
       - ASPNETCORE_URLS=http://+:8080
     networks:
       - microservicesnetwork
+    restart: on-failure
 
   apigateway:
     container_name: apigateway
@@ -139,7 +143,7 @@
       context: .
       dockerfile: MyCartAPIGateWay/Dockerfile
     ports:
-      - "19000:8080"
+      - "29000:8080"
     depends_on:
       categorymicroservices:
         condition: service_started
@@ -150,10 +154,11 @@
       purchasemicroservices:
         condition: service_started
     environment:
-      - ASPNETCORE_ENVIRONMENT=Production
+      - ASPNETCORE_ENVIRONMENT=Docker
       - ASPNETCORE_URLS=http://+:8080
     networks:
       - microservicesnetwork
+    restart: on-failure
 
 networks:
   microservicesnetwork:

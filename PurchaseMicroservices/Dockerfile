@@ -2,11 +2,12 @@
 WORKDIR /app
 EXPOSE 8080
 
-FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
+FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
 
 COPY ["PurchaseMicroservices/PurchaseMicroservices.csproj", "PurchaseMicroservices/"]
 COPY ["SharedLibrary/SharedLibrary.csproj", "SharedLibrary/"]
+
 RUN dotnet restore "PurchaseMicroservices/PurchaseMicroservices.csproj"
 
 COPY ["PurchaseMicroservices/", "PurchaseMicroservices/"]

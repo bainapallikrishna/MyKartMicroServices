@@ -96,6 +96,6 @@
     }
   ],
   "GlobalConfiguration": {
-    "BaseUrl": "http://localhost:19000"
+    "BaseUrl": "http://localhost:29000"
   }
 }

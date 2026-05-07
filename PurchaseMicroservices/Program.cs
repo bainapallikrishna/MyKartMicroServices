@@ -12,9 +12,15 @@ namespace PurchaseMicroservices
         {
             var builder = WebApplication.CreateBuilder(args);
 
+            // ✅ Environment-aware config loading
+            var env = builder.Environment.EnvironmentName;
+            builder.Configuration
+                .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+                .AddJsonFile($"appsettings.{env}.json", optional: true, reloadOnChange: true)
+                .AddEnvironmentVariables();
+
             builder.Services.AddControllers();
             builder.Services.AddEndpointsApiExplorer();
-            // ADD before Build()
             builder.Services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new() { Title = "Purchase Service", Version = "v1" });
@@ -33,6 +39,7 @@ namespace PurchaseMicroservices
             builder.Services.AddHttpClient();
             builder.Services.AddGrpcClient<ProductGrpc.ProductGrpcClient>(options =>
             {
+                // ✅ Now reads correctly from Development or Docker config
                 var address = builder.Configuration.GetValue<string>("Grpc:ProductService");
                 options.Address = new Uri(address);
             });

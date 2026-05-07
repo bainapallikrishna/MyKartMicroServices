@@ -1,60 +1,51 @@
-services:
-  categoryservicedb:
-    environment:
-      - ACCEPT_EULA=Y
-      - MSSQL_SA_PASSWORD=seSSion@12
-
-  productservicedb:
-    environment:
-      - ACCEPT_EULA=Y
-      - MSSQL_SA_PASSWORD=seSSion@12
-
-  userservicedb:
-    environment:
-      - ACCEPT_EULA=Y
-      - MSSQL_SA_PASSWORD=seSSion@12
-
-  purchaseservicedb:
-    environment:
-      - ACCEPT_EULA=Y
-      - MSSQL_SA_PASSWORD=seSSion@12
+﻿services:
 
   categorymicroservices:
     environment:
-      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_ENVIRONMENT=Docker
       - ASPNETCORE_URLS=http://+:8080
+    ports:
+      - "26001:8080"
     volumes:
       - ${APPDATA}/Microsoft/UserSecrets:/root/.microsoft/usersecrets:ro
       - ${APPDATA}/ASP.NET/Https:/root/.aspnet/https:ro
 
   productmicroservices:
     environment:
-      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_ENVIRONMENT=Docker
       - ASPNETCORE_URLS=http://+:8080
+    ports:
+      - "28001:8080"
     volumes:
       - ${APPDATA}/Microsoft/UserSecrets:/root/.microsoft/usersecrets:ro
       - ${APPDATA}/ASP.NET/Https:/root/.aspnet/https:ro
 
   usermicroservices:
     environment:
-      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_ENVIRONMENT=Docker
       - ASPNETCORE_URLS=http://+:8080
+    ports:
+      - "25001:8080"
     volumes:
       - ${APPDATA}/Microsoft/UserSecrets:/root/.microsoft/usersecrets:ro
       - ${APPDATA}/ASP.NET/Https:/root/.aspnet/https:ro
 
   purchasemicroservices:
     environment:
-      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_ENVIRONMENT=Docker
       - ASPNETCORE_URLS=http://+:8080
+    ports:
+      - "27001:8080"
     volumes:
       - ${APPDATA}/Microsoft/UserSecrets:/root/.microsoft/usersecrets:ro
       - ${APPDATA}/ASP.NET/Https:/root/.aspnet/https:ro
 
   apigateway:
     environment:
-      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_ENVIRONMENT=Docker
       - ASPNETCORE_URLS=http://+:8080
+    ports:
+      - "29000:8080"
     volumes:
       - ${APPDATA}/Microsoft/UserSecrets:/root/.microsoft/usersecrets:ro
       - ${APPDATA}/ASP.NET/Https:/root/.aspnet/https:ro

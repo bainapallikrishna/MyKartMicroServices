@@ -12,6 +12,11 @@ namespace UserMicroservices
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
+            var env = builder.Environment.EnvironmentName;
+            builder.Configuration
+                .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+                .AddJsonFile($"appsettings.{env}.json", optional: true, reloadOnChange: true)
+                .AddEnvironmentVariables();
             builder.Services.AddControllers();
             builder.Services.AddGrpc();
             builder.Services.AddEndpointsApiExplorer();
