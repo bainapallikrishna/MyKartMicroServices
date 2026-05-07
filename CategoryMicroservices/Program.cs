@@ -12,6 +12,13 @@ namespace CategoryMicroservices
         {
             var builder = WebApplication.CreateBuilder(args);
 
+            // ✅ Environment-aware config loading
+            var env = builder.Environment.EnvironmentName;
+            builder.Configuration
+                .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+                .AddJsonFile($"appsettings.{env}.json", optional: true, reloadOnChange: true)
+                .AddEnvironmentVariables();
+
             builder.Services.AddControllers();
             builder.Services.AddGrpc();
             builder.Services.AddEndpointsApiExplorer();
@@ -21,7 +28,10 @@ namespace CategoryMicroservices
             });
 
             builder.Services.AddDbContext<CategoryDBContext>(options =>
-                options.UseSqlServer(builder.Configuration.GetConnectionString("CategoryDBConnectionString")));
+                options.UseSqlServer(
+                    builder.Configuration.GetConnectionString("CategoryDBConnectionString"),
+                    sqlOptions => sqlOptions.EnableRetryOnFailure(5, TimeSpan.FromSeconds(30), null)
+                ));
 
             builder.Services.AddScoped<CategoryRepository>();
 
@@ -40,7 +50,7 @@ namespace CategoryMicroservices
                 try
                 {
                     var context = services.GetRequiredService<CategoryDBContext>();
-                    context.Database.Migrate();  // creates DB + runs all migrations automatically
+                    context.Database.Migrate();
                 }
                 catch (Exception ex)
                 {

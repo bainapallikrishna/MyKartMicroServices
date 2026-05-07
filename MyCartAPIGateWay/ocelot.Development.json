@@ -9,9 +9,6 @@
           "Port": 5124
         }
       ],
-      "HttpHandlerOptions": {
-        "DangerousAcceptAnyServerCertificateValidator": true
-      },
       "UpstreamPathTemplate": "/category/{everything}",
       "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ],
       "SwaggerKey": "CategoryService"
@@ -25,9 +22,6 @@
           "Port": 21464
         }
       ],
-      "HttpHandlerOptions": {
-        "DangerousAcceptAnyServerCertificateValidator": true
-      },
       "UpstreamPathTemplate": "/product/{everything}",
       "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ],
       "SwaggerKey": "ProductService"
@@ -41,9 +35,6 @@
           "Port": 35805
         }
       ],
-      "HttpHandlerOptions": {
-        "DangerousAcceptAnyServerCertificateValidator": true
-      },
       "UpstreamPathTemplate": "/user/{everything}",
       "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ],
       "SwaggerKey": "UserService"
@@ -57,9 +48,6 @@
           "Port": 47513
         }
       ],
-      "HttpHandlerOptions": {
-        "DangerousAcceptAnyServerCertificateValidator": true
-      },
       "UpstreamPathTemplate": "/purchase/{everything}",
       "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ],
       "SwaggerKey": "PurchaseService"
@@ -108,6 +96,6 @@
     }
   ],
   "GlobalConfiguration": {
-    "BaseUrl": "http://localhost:60123"
+    "BaseUrl": "http://localhost:5048"
   }
 }
