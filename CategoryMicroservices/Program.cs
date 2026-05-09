@@ -62,7 +62,7 @@ namespace CategoryMicroservices
             app.UseGlobalExceptionHandling();
             app.UseRequestLogging();
             app.UseSwagger();
-            app.UseSwaggerUI();
+           // app.UseSwaggerUI();
             app.UseAuthorization();
             app.MapControllers();
             app.MapGrpcService<CategoryGrpcService>();

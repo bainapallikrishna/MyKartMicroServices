@@ -76,7 +76,7 @@ namespace PurchaseMicroservices.Controllers
                 return NotFound("Product not found");
             }
         }
-        [HttpPost("purchase")]
+        [HttpPost("purchaseProduct")]
         public async Task<JsonResult> AddPurchase(Purchase purchase)
         {
             string result = "";
