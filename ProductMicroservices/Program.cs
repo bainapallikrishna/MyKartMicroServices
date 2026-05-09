@@ -63,7 +63,7 @@ using (var scope = app.Services.CreateScope())
 app.UseGlobalExceptionHandling();
 app.UseRequestLogging();
 app.UseSwagger();
-app.UseSwaggerUI();
+//app.UseSwaggerUI();
 app.UseAuthorization();
 app.MapControllers();
 app.MapGrpcService<ProductGrpcService>();
