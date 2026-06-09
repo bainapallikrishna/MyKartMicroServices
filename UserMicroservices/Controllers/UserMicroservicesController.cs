@@ -7,6 +7,7 @@ namespace UserMicroservices.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Microsoft.AspNetCore.Authorization.Authorize]
     public class UserMicroservicesController : Controller
     {
         UserRepository repository;
@@ -31,6 +32,7 @@ namespace UserMicroservices.Controllers
         }
 
         [HttpPost]
+        [Microsoft.AspNetCore.Authorization.AllowAnonymous]
         public JsonResult AddNewUser(User user)
         {
             return Json(repository.AddNewUser(user));

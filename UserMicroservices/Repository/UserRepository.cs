@@ -1,16 +1,18 @@
-﻿using UserMicroservices.Models;
+﻿using System.Linq;
+using Microsoft.Extensions.Logging;
+using UserMicroservices.Models;
 
 namespace UserMicroservices.Repository
 {
-    public class UserRepository
+    public class UserRepository 
     {
-        UserDBContext dbContext;
-        public UserRepository()
+        private readonly UserDBContext dbContext;
+        private readonly ILogger<UserRepository> _logger;
+
+        public UserRepository(UserDBContext dbContext, ILogger<UserRepository> logger)
         {
-        }
-        public UserRepository(UserDBContext context)
-        {
-            dbContext = context;
+            this.dbContext = dbContext;
+            _logger = logger;
         }
 
         public List<User> GetAllUsers()
@@ -24,6 +26,10 @@ namespace UserMicroservices.Repository
             bool status = false;
             try
             {
+                // Hash password before storing
+                user.UserPassword = HashPassword(user.UserPassword);
+                user.FailedLoginAttempts = 0;
+                user.LockoutEnd = null;
                 dbContext.Users.Add(user);
                 dbContext.SaveChanges();
                 status = true;
@@ -33,6 +39,28 @@ namespace UserMicroservices.Repository
                 status = false;
             }
             return status;
+        }
+
+        public User? GetUserByEmail(string email)
+        {
+            _logger.LogInformation("Fetching user by email: {Email}", email);
+            // Use SingleOrDefault on EmailId since Find expects the primary key
+            var user = dbContext.Users.SingleOrDefault(u => u.EmailId == email);
+            if (user == null)
+                _logger.LogInformation("User not found: {Email}", email);
+            else
+                _logger.LogInformation("User found: {Email}", email);
+            return user;
+        }
+
+        public bool UpdatePassword(string EmailId, string newPassword)
+        {
+            var user = dbContext.Users.Find(EmailId);
+            if (user == null) return false;
+            user.UserPassword = HashPassword(newPassword);
+            dbContext.Users.Update(user);
+            dbContext.SaveChanges();
+            return true;
         }
         public int UpdateUserDetails(User user)
         {
@@ -77,6 +105,15 @@ namespace UserMicroservices.Repository
                 status = false;
             }
             return status;
+        }
+
+        private static string HashPassword(string password)
+        {
+            if (string.IsNullOrEmpty(password)) return string.Empty;
+            using var sha = System.Security.Cryptography.SHA256.Create();
+            var bytes = System.Text.Encoding.UTF8.GetBytes(password);
+            var hash = sha.ComputeHash(bytes);
+            return Convert.ToBase64String(hash);
         }
     }
 }

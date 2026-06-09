@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 
@@ -16,8 +17,32 @@ public sealed class RequestLoggingMiddleware
 
     public async Task Invoke(HttpContext context)
     {
-        _logger.LogInformation("HTTP {Method} {Path}", context.Request.Method, context.Request.Path);
-        await _next(context);
+        var sw = Stopwatch.StartNew();
+        try
+        {
+            _logger.LogInformation("HTTP {Method} {Path} starting from {RemoteIpAddress}",
+                context.Request.Method,
+                context.Request.Path,
+                context.Connection.RemoteIpAddress?.ToString() ?? "unknown");
+
+            await _next(context);
+
+            sw.Stop();
+            _logger.LogInformation("HTTP {Method} {Path} responded {StatusCode} in {ElapsedMs}ms",
+                context.Request.Method,
+                context.Request.Path,
+                context.Response?.StatusCode,
+                sw.ElapsedMilliseconds);
+        }
+        catch (Exception ex)
+        {
+            sw.Stop();
+            _logger.LogError(ex, "HTTP {Method} {Path} failed after {ElapsedMs}ms",
+                context.Request.Method,
+                context.Request.Path,
+                sw.ElapsedMilliseconds);
+            throw;
+        }
     }
 }
 

@@ -4,6 +4,7 @@ using UserMicroservices.Models;
 using UserMicroservices.Repository;
 using UserMicroservices.Grpc;
 using SharedLibrary.Common;
+using Microsoft.Extensions.Logging;
 
 namespace UserMicroservices
 {
@@ -12,18 +13,51 @@ namespace UserMicroservices
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
+            // Configure console logging and clear default providers to ensure consistent logging behavior
+            builder.Logging.ClearProviders();
+            builder.Logging.AddConsole();
             var env = builder.Environment.EnvironmentName;
             builder.Configuration
                 .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
                 .AddJsonFile($"appsettings.{env}.json", optional: true, reloadOnChange: true)
                 .AddEnvironmentVariables();
             builder.Services.AddControllers();
+            // JWT Authentication
+            builder.Services.AddJwtAuthentication(builder.Configuration);
             builder.Services.AddGrpc();
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new() { Title = "User Service", Version = "v1" });
+                // Add JWT Authorization to Swagger
+                c.AddSecurityDefinition("Bearer", new Microsoft.OpenApi.Models.OpenApiSecurityScheme
+                {
+                    Description = "JWT Authorization header using the Bearer scheme. Example: \"Authorization: Bearer {token}\"",
+                    Name = "Authorization",
+                    In = Microsoft.OpenApi.Models.ParameterLocation.Header,
+                    Type = Microsoft.OpenApi.Models.SecuritySchemeType.Http,
+                    Scheme = "bearer",
+                    BearerFormat = "JWT"
+                });
+
+                c.AddSecurityRequirement(new Microsoft.OpenApi.Models.OpenApiSecurityRequirement {
+                    {
+                        new Microsoft.OpenApi.Models.OpenApiSecurityScheme
+                        {
+                            Reference = new Microsoft.OpenApi.Models.OpenApiReference
+                            {
+                                Type = Microsoft.OpenApi.Models.ReferenceType.SecurityScheme,
+                                Id = "Bearer"
+                            }
+                        }, new string[] {}
+                    }
+                });
             });
+
+            // Register context accessor and propagation handler outside of the SwaggerGen options
+            builder.Services.AddHttpContextAccessor();
+            builder.Services.AddTransient<AuthorizationPropagationHandler>();
+            builder.Services.AddHttpClient("PropagatingClient").AddHttpMessageHandler<AuthorizationPropagationHandler>();
             builder.Services.AddDbContext<UserDBContext>(options =>
                options.UseSqlServer(
                    builder.Configuration.GetConnectionString("UserDBConnectionString"),
@@ -45,6 +79,9 @@ namespace UserMicroservices
 
             var app = builder.Build();
 
+            // Logging
+            app.UseSharedLogging();
+
             // ✅ Auto migrate on startup — same as CategoryService
             using (var scope = app.Services.CreateScope())
             {
@@ -63,8 +100,9 @@ namespace UserMicroservices
 
             app.UseGlobalExceptionHandling();
             app.UseRequestLogging();
+            app.UseAuthentication();
             app.UseSwagger();
-           // app.UseSwaggerUI();
+            app.UseSwaggerUI();
             app.UseAuthorization();
             app.MapControllers();
             app.MapGrpcService<UserGrpcService>();

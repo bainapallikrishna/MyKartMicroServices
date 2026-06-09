@@ -4,6 +4,7 @@ namespace PurchaseMicroservices.Controllers
 {
     [ApiController]
     [Route("[controller]")]
+    [Microsoft.AspNetCore.Authorization.Authorize]
     public class WeatherForecastController : ControllerBase
     {
         private static readonly string[] Summaries = new[]

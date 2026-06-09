@@ -1,0 +1,25 @@
+{
+  "version": "1",
+  "configurations": [
+    {
+      "name": "All Services + Swagger Gateway",
+      "projects": {
+        "MyCartAPIGateWay": {
+          "profileName": "http"
+        },
+        "CategoryMicroservices": {
+          "profileName": "http"
+        },
+        "ProductMicroservices": {
+          "profileName": "http"
+        },
+        "UserMicroservices": {
+          "profileName": "http"
+        },
+        "PurchaseMicroservices": {
+          "profileName": "http"
+        }
+      }
+    }
+  ]
+}
