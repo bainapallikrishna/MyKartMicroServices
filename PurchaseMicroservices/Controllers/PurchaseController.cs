@@ -8,6 +8,7 @@ namespace PurchaseMicroservices.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Microsoft.AspNetCore.Authorization.Authorize]
     public class PurchaseController : ControllerBase
     {
         public readonly PurchaseRepository _purchaseRepository;

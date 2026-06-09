@@ -33,9 +33,15 @@ namespace UserMicroservices.Migrations
                     b.Property<DateTime>("DateOfBirth")
                         .HasColumnType("datetime2");
 
+                    b.Property<int>("FailedLoginAttempts")
+                        .HasColumnType("int");
+
                     b.Property<string>("Gender")
                         .IsRequired()
                         .HasColumnType("nvarchar(1)");
+
+                    b.Property<DateTime?>("LockoutEnd")
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("RoleName")
                         .HasColumnType("nvarchar(max)");
@@ -53,6 +59,7 @@ namespace UserMicroservices.Migrations
                             EmailId = "Franken@gmail.com",
                             Address = "Texas, USA",
                             DateOfBirth = new DateTime(1978, 9, 10, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            FailedLoginAttempts = 0,
                             Gender = "M",
                             RoleName = "Admin",
                             UserPassword = "Franken@785"
@@ -62,6 +69,7 @@ namespace UserMicroservices.Migrations
                             EmailId = "SamRocks@gmail.com",
                             Address = "Denver, USA",
                             DateOfBirth = new DateTime(1986, 3, 3, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            FailedLoginAttempts = 0,
                             Gender = "M",
                             RoleName = "User",
                             UserPassword = "Sam@564"
@@ -71,6 +79,7 @@ namespace UserMicroservices.Migrations
                             EmailId = "PaulGrey@gmail.com",
                             Address = "Denver, USA",
                             DateOfBirth = new DateTime(1993, 7, 7, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            FailedLoginAttempts = 0,
                             Gender = "M",
                             RoleName = "User",
                             UserPassword = "Paul@123"

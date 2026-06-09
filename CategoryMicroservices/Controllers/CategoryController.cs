@@ -9,6 +9,7 @@ namespace CategoryMicroservices.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Microsoft.AspNetCore.Authorization.Authorize]
     public class CategoryController : Controller
 
     {

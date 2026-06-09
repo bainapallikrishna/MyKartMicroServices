@@ -6,6 +6,7 @@ namespace ProductMicroservices.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Microsoft.AspNetCore.Authorization.Authorize]
     public class ProductController : Controller
     {
         public readonly Repository.ProductRepository _productRepository;

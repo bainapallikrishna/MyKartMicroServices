@@ -7,6 +7,10 @@ using SharedLibrary.Common;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Configure logging providers
+builder.Logging.ClearProviders();
+builder.Logging.AddConsole();
+
 // ✅ Environment-aware config loading
 var env = builder.Environment.EnvironmentName;
 builder.Configuration
@@ -22,6 +26,8 @@ builder.Services.AddDbContext<ProductDBContext>(options =>
            ));
 
 builder.Services.AddTransient<ProductRepository>();
+// JWT Authentication
+builder.Services.AddJwtAuthentication(builder.Configuration);
 builder.Services.AddGrpc();
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
@@ -29,10 +35,36 @@ builder.Services.AddControllers()
         options.JsonSerializerOptions.ReferenceHandler =
             System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles;
     });
+// Register context accessor and propagation handler
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddTransient<AuthorizationPropagationHandler>();
+builder.Services.AddHttpClient("PropagatingClient").AddHttpMessageHandler<AuthorizationPropagationHandler>();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new() { Title = "Product Service", Version = "v1" });
+    c.AddSecurityDefinition("Bearer", new Microsoft.OpenApi.Models.OpenApiSecurityScheme
+    {
+        Description = "JWT Authorization header using the Bearer scheme. Example: \"Authorization: Bearer {token}\"",
+        Name = "Authorization",
+        In = Microsoft.OpenApi.Models.ParameterLocation.Header,
+        Type = Microsoft.OpenApi.Models.SecuritySchemeType.Http,
+        Scheme = "bearer",
+        BearerFormat = "JWT"
+    });
+
+    c.AddSecurityRequirement(new Microsoft.OpenApi.Models.OpenApiSecurityRequirement {
+        {
+            new Microsoft.OpenApi.Models.OpenApiSecurityScheme
+            {
+                Reference = new Microsoft.OpenApi.Models.OpenApiReference
+                {
+                    Type = Microsoft.OpenApi.Models.ReferenceType.SecurityScheme,
+                    Id = "Bearer"
+                }
+            }, new string[] {}
+        }
+    });
 });
 
 builder.WebHost.ConfigureKestrel(options =>
@@ -60,10 +92,14 @@ using (var scope = app.Services.CreateScope())
     }
 }
 
+// Use shared logging middleware
+app.UseSharedLogging();
+
 app.UseGlobalExceptionHandling();
 app.UseRequestLogging();
+app.UseAuthentication();
 app.UseSwagger();
-//app.UseSwaggerUI();
+app.UseSwaggerUI();
 app.UseAuthorization();
 app.MapControllers();
 app.MapGrpcService<ProductGrpcService>();

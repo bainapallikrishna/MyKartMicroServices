@@ -1,5 +1,7 @@
+using System;
 using System.Net;
 using System.Text.Json;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 
@@ -35,6 +37,9 @@ public sealed class GlobalExceptionMiddleware
                 var payload = JsonSerializer.Serialize(new { message = "Internal server error" });
                 await context.Response.WriteAsync(payload);
             }
+
+  
+        return;
         }
     }
 }

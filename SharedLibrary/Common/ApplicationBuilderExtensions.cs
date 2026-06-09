@@ -13,5 +13,12 @@ public static class ApplicationBuilderExtensions
     {
         return app.UseMiddleware<RequestLoggingMiddleware>();
     }
+
+    public static IApplicationBuilder UseSharedLogging(this IApplicationBuilder app)
+    {
+        app.UseMiddleware<GlobalExceptionMiddleware>();
+        app.UseMiddleware<RequestLoggingMiddleware>();
+        return app;
+    }
 }
 

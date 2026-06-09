@@ -4,13 +4,24 @@ namespace UserMicroservices.Models
 {
     public class UserDBContext : DbContext
     {
-    
-        public UserDBContext(DbContextOptions<UserDBContext> options) : base(options) { }
+        public UserDBContext(DbContextOptions<UserDBContext> options) : base(options)
+        {
+        }
 
         public DbSet<User> Users { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            modelBuilder.Entity<User>(entity =>
+            {
+                entity.HasKey(e => e.EmailId);
+                entity.Property(e => e.EmailId).HasColumnName("EmailId");
+                entity.Property(e => e.UserPassword).HasColumnName("UserPassword");
+                entity.Property(e => e.RoleName).HasColumnName("RoleName");
+                entity.Property(e => e.FailedLoginAttempts).HasColumnName("FailedLoginAttempts");
+                entity.Property(e => e.LockoutEnd).HasColumnName("LockoutEnd");
+            });
+
             modelBuilder.Entity<User>().HasData(
                 new User
                 {
@@ -40,6 +51,8 @@ namespace UserMicroservices.Models
                     Address = "Denver, USA"
                 }
             );
+
+            base.OnModelCreating(modelBuilder);
         }
     }
 }
