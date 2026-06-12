@@ -5,6 +5,13 @@ using System.Security.Claims;
 using System.Text;
 using UserMicroservices.Repository;
 using UserMicroservices.Models;
+using System;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using System.Security.Cryptography;
+using Microsoft.AspNetCore.Authorization;
 
 namespace UserMicroservices.Controllers;
 
@@ -15,12 +22,16 @@ public class AuthController : ControllerBase
     private readonly UserRepository _repo;
     private readonly IConfiguration _configuration;
 
+ 
+    private static readonly ConcurrentDictionary<string, RefreshTokenInfo> _refreshTokens = new();
+
     public AuthController(UserRepository repo, IConfiguration configuration)
     {
         _repo = repo;
         _configuration = configuration;
     }
 
+    [AllowAnonymous]
     [HttpPost("token")]
     public IActionResult Token([FromBody] LoginRequest request)
     {
@@ -49,7 +60,7 @@ public class AuthController : ControllerBase
                 user.FailedLoginAttempts = 0;
             }
             _repo.UpdateUserDetails(user);
-           // return Unauthorized();
+            return Unauthorized();
         }
 
         // reset failed attempts on success
@@ -57,6 +68,41 @@ public class AuthController : ControllerBase
         user.LockoutEnd = null;
         _repo.UpdateUserDetails(user);
 
+        var authResult = CreateTokens(user);
+
+        return Ok(authResult);
+    }
+
+    [AllowAnonymous]
+    [HttpPost("refresh")]
+    public IActionResult Refresh([FromBody] RefreshRequest request)
+    {
+        if (string.IsNullOrEmpty(request.RefreshToken))
+            return BadRequest();
+
+        if (!_refreshTokens.TryGetValue(request.RefreshToken, out var info))
+            return Unauthorized();
+
+        if (info.ExpiresAt < DateTime.UtcNow)
+        {
+            _refreshTokens.TryRemove(request.RefreshToken, out _);
+            return Unauthorized();
+        }
+
+        var user = _repo.GetUserByEmail(info.Email);
+        if (user == null)
+            return Unauthorized();
+
+        // Issue new tokens
+        // Remove old refresh token and create a new one
+        _refreshTokens.TryRemove(request.RefreshToken, out _);
+        var authResult = CreateTokens(user);
+
+        return Ok(authResult);
+    }
+
+    private AuthResult CreateTokens(User user)
+    {
         var jwtSection = _configuration.GetSection("Jwt");
         var key = jwtSection.GetValue<string>("Key") ?? "ThisIsASecretKeyForJwtTokenDoNotUseInProduction";
         var issuer = jwtSection.GetValue<string>("Issuer") ?? "MyKartIssuer";
@@ -73,7 +119,7 @@ public class AuthController : ControllerBase
         var tokenDescriptor = new SecurityTokenDescriptor
         {
             Subject = new ClaimsIdentity(claims),
-            Expires = DateTime.UtcNow.AddHours(2),
+            Expires = DateTime.UtcNow.AddMinutes(15),
             Issuer = issuer,
             Audience = audience,
             SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(keyBytes), SecurityAlgorithms.HmacSha256Signature)
@@ -82,8 +128,37 @@ public class AuthController : ControllerBase
         var token = tokenHandler.CreateToken(tokenDescriptor);
         var tokenString = tokenHandler.WriteToken(token);
 
-        return Ok(new { token = tokenString });
+        // create refresh token
+        var refreshToken = Convert.ToBase64String(RandomNumberGenerator.GetBytes(64));
+        var refreshInfo = new RefreshTokenInfo
+        {
+            Email = user.EmailId,
+            ExpiresAt = DateTime.UtcNow.AddDays(7)
+        };
+        _refreshTokens[refreshToken] = refreshInfo;
+
+        return new AuthResult
+        {
+            AccessToken = tokenString,
+            RefreshToken = refreshToken,
+            ExpiresAt = tokenDescriptor.Expires ?? DateTime.UtcNow.AddMinutes(15)
+        };
     }
 }
 
+// DTOs and helpers
 public record LoginRequest(string Email, string Password);
+public record RefreshRequest(string RefreshToken);
+
+public class AuthResult
+{
+    public string AccessToken { get; set; } = string.Empty;
+    public string RefreshToken { get; set; } = string.Empty;
+    public DateTime ExpiresAt { get; set; }
+}
+
+public class RefreshTokenInfo
+{
+    public string Email { get; set; } = string.Empty;
+    public DateTime ExpiresAt { get; set; }
+}

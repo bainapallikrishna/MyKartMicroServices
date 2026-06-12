@@ -4,7 +4,6 @@ using SharedLibrary.Common;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Logging
 builder.Logging.ClearProviders();
 builder.Logging.AddConsole();
 
@@ -14,9 +13,9 @@ builder.Configuration
                   optional: true,
                   reloadOnChange: true);
 
+// Removed AddMyKartCors() - no such extension exists in the SharedLibrary. Register CORS below instead.
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerForOcelot(builder.Configuration);
-// Add SwaggerGen to allow JWT in Swagger UI
 builder.Services.AddSwaggerGen(c =>
 {
     c.AddSecurityDefinition("Bearer", new Microsoft.OpenApi.Models.OpenApiSecurityScheme
@@ -43,8 +42,19 @@ builder.Services.AddSwaggerGen(c =>
     });
 });
 builder.Services.AddOcelot(builder.Configuration);
-// JWT Authentication for Gateway
 builder.Services.AddJwtAuthentication(builder.Configuration);
+// CORS - allow requests from browser clients (adjust for production)
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AngularPolicy", policy =>
+    {
+        policy
+            .WithOrigins("http://localhost:4200")
+            .AllowAnyHeader()
+            .AllowAnyMethod()
+            .AllowCredentials();
+    });
+});
 
 var app = builder.Build();
 
@@ -53,15 +63,26 @@ if (app.Environment.IsDevelopment())
     app.UseDeveloperExceptionPage();
 }
 
-// Use centralized shared logging middleware
+app.UseCors("AngularPolicy");
 app.UseSharedLogging();
 
-app.UseAuthentication();
+app.MapGet("/", () => Results.Redirect("/swagger"));
 
 app.UseSwaggerForOcelotUI(options =>
 {
     options.PathToSwaggerGenerator = "/swagger/docs";
 });
+
+app.UseWhen(context =>
+    !context.Request.Path.StartsWithSegments("/swagger") &&
+    !context.Request.Path.StartsWithSegments("/swagger/docs") &&
+    !context.Request.Path.StartsWithSegments("/user/Auth", StringComparison.OrdinalIgnoreCase),
+    appBuilder =>
+    {
+        appBuilder.UseAuthentication();
+        appBuilder.UseAuthorization();
+    }
+);
 
 await app.UseOcelot();
 app.Run();

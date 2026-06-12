@@ -1,80 +1,72 @@
 {
   "Routes": [
     {
-      "DownstreamPathTemplate": "/api/Auth/{everything}",
-      "DownstreamScheme": "http",
-      "DownstreamHostAndPorts": [
-        {
-          "Host": "localhost",
-          "Port": 35805
-        }
-      ],
-      "UpstreamPathTemplate": "/user/api/Auth/{everything}",
-      "UpstreamHttpMethod": [ "POST" ]
-    },
-    {
-      "DownstreamPathTemplate": "/api/UserMicroservices",
-      "DownstreamScheme": "http",
-      "DownstreamHostAndPorts": [
-        {
-          "Host": "localhost",
-          "Port": 35805
-        }
-      ],
-      "UpstreamPathTemplate": "/user/api/UserMicroservices",
-      "UpstreamHttpMethod": [ "POST" ]
-    },
-    {
       "DownstreamPathTemplate": "/api/{everything}",
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "localhost",
-          "Port": 5124
+          "Host": "categorymicroservices",
+          "Port": 8080
         }
       ],
       "UpstreamPathTemplate": "/category/{everything}",
       "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ],
-      "SwaggerKey": "CategoryService"
+      "SwaggerKey": "CategoryService",
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Bearer",
+        "AllowedScopes": []
+      }
     },
     {
       "DownstreamPathTemplate": "/api/{everything}",
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "localhost",
-          "Port": 21464
+          "Host": "productmicroservices",
+          "Port": 8080
         }
       ],
       "UpstreamPathTemplate": "/product/{everything}",
       "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ],
-      "SwaggerKey": "ProductService"
+      "SwaggerKey": "ProductService",
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Bearer",
+        "AllowedScopes": []
+      }
     },
     {
       "DownstreamPathTemplate": "/api/{everything}",
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "localhost",
-          "Port": 35805
+          "Host": "usermicroservices",
+          "Port": 8080
         }
       ],
       "UpstreamPathTemplate": "/user/{everything}",
       "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ],
-      "SwaggerKey": "UserService"
+      "SwaggerKey": "UserService",
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Bearer",
+        "AllowedScopes": []
+      }
     },
     {
       "DownstreamPathTemplate": "/api/{everything}",
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "localhost",
-          "Port": 47513
+          "Host": "purchasemicroservices",
+          "Port": 8080
         }
       ],
       "UpstreamPathTemplate": "/purchase/{everything}",
       "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ],
-      "SwaggerKey": "PurchaseService"
+      "SwaggerKey": "PurchaseService",
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Bearer",
+        "AllowedScopes": []
+      }
     }
   ],
   "SwaggerEndPoints": [
@@ -84,7 +76,7 @@
         {
           "Name": "Category Service",
           "Version": "v1",
-          "Url": "http://localhost:5124/swagger/v1/swagger.json"
+          "Url": "http://categorymicroservices:8080/swagger/v1/swagger.json"
         }
       ]
     },
@@ -94,7 +86,7 @@
         {
           "Name": "Product Service",
           "Version": "v1",
-          "Url": "http://localhost:21464/swagger/v1/swagger.json"
+          "Url": "http://productmicroservices:8080/swagger/v1/swagger.json"
         }
       ]
     },
@@ -104,7 +96,7 @@
         {
           "Name": "User Service",
           "Version": "v1",
-          "Url": "http://localhost:35805/swagger/v1/swagger.json"
+          "Url": "http://usermicroservices:8080/swagger/v1/swagger.json"
         }
       ]
     },
@@ -114,12 +106,12 @@
         {
           "Name": "Purchase Service",
           "Version": "v1",
-          "Url": "http://localhost:47513/swagger/v1/swagger.json"
+          "Url": "http://purchasemicroservices:8080/swagger/v1/swagger.json"
         }
       ]
     }
   ],
   "GlobalConfiguration": {
-    "BaseUrl": "http://localhost:5048"
+    "BaseUrl": "http://localhost:29000"
   }
 }
