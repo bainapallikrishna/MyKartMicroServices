@@ -76,7 +76,7 @@ namespace CategoryMicroservices
                     listenOptions.Protocols = HttpProtocols.Http1AndHttp2;
                 });
             });
-
+            builder.Services.AddRedisCache(builder.Configuration);
             var app = builder.Build();
 
             // Use centralized shared logging middleware

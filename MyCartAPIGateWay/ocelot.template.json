@@ -1,72 +1,80 @@
 {
   "Routes": [
     {
+      "DownstreamPathTemplate": "/api/Auth/{everything}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "${UserHost}",
+          "Port": ${UserPort}
+        }
+      ],
+      "UpstreamPathTemplate": "/user/api/Auth/{everything}",
+      "UpstreamHttpMethod": [ "POST" ]
+    },
+    {
+      "DownstreamPathTemplate": "/api/UserMicroservices",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "${UserHost}",
+          "Port": ${UserPort}
+        }
+      ],
+      "UpstreamPathTemplate": "/user/api/UserMicroservices",
+      "UpstreamHttpMethod": [ "POST" ]
+    },
+    {
       "DownstreamPathTemplate": "/api/{everything}",
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "categorymicroservices",
-          "Port": 8080
+          "Host": "${CategoryHost}",
+          "Port": ${CategoryPort}
         }
       ],
       "UpstreamPathTemplate": "/category/{everything}",
       "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ],
-      "SwaggerKey": "CategoryService",
-      "AuthenticationOptions": {
-        "AuthenticationProviderKey": "Bearer",
-        "AllowedScopes": []
-      }
+      "SwaggerKey": "CategoryService"
     },
     {
       "DownstreamPathTemplate": "/api/{everything}",
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "productmicroservices",
-          "Port": 8080
+          "Host": "${ProductHost}",
+          "Port": ${ProductPort}
         }
       ],
       "UpstreamPathTemplate": "/product/{everything}",
       "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ],
-      "SwaggerKey": "ProductService",
-      "AuthenticationOptions": {
-        "AuthenticationProviderKey": "Bearer",
-        "AllowedScopes": []
-      }
+      "SwaggerKey": "ProductService"
     },
     {
       "DownstreamPathTemplate": "/api/{everything}",
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "usermicroservices",
-          "Port": 8080
+          "Host": "${UserHost}",
+          "Port": ${UserPort}
         }
       ],
       "UpstreamPathTemplate": "/user/{everything}",
       "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ],
-      "SwaggerKey": "UserService",
-      "AuthenticationOptions": {
-        "AuthenticationProviderKey": "Bearer",
-        "AllowedScopes": []
-      }
+      "SwaggerKey": "UserService"
     },
     {
       "DownstreamPathTemplate": "/api/{everything}",
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "purchasemicroservices",
-          "Port": 8080
+          "Host": "${PurchaseHost}",
+          "Port": ${PurchasePort}
         }
       ],
       "UpstreamPathTemplate": "/purchase/{everything}",
       "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ],
-      "SwaggerKey": "PurchaseService",
-      "AuthenticationOptions": {
-        "AuthenticationProviderKey": "Bearer",
-        "AllowedScopes": []
-      }
+      "SwaggerKey": "PurchaseService"
     }
   ],
   "SwaggerEndPoints": [
@@ -76,7 +84,7 @@
         {
           "Name": "Category Service",
           "Version": "v1",
-          "Url": "http://categorymicroservices:8080/swagger/v1/swagger.json"
+          "Url": "http://${CategoryHost}:${CategoryPort}/swagger/v1/swagger.json"
         }
       ]
     },
@@ -86,7 +94,7 @@
         {
           "Name": "Product Service",
           "Version": "v1",
-          "Url": "http://productmicroservices:8080/swagger/v1/swagger.json"
+          "Url": "http://${ProductHost}:${ProductPort}/swagger/v1/swagger.json"
         }
       ]
     },
@@ -96,7 +104,7 @@
         {
           "Name": "User Service",
           "Version": "v1",
-          "Url": "http://usermicroservices:8080/swagger/v1/swagger.json"
+          "Url": "http://${UserHost}:${UserPort}/swagger/v1/swagger.json"
         }
       ]
     },
@@ -106,12 +114,12 @@
         {
           "Name": "Purchase Service",
           "Version": "v1",
-          "Url": "http://purchasemicroservices:8080/swagger/v1/swagger.json"
+          "Url": "http://${PurchaseHost}:${PurchasePort}/swagger/v1/swagger.json"
         }
       ]
     }
   ],
   "GlobalConfiguration": {
-    "BaseUrl": "http://localhost:5048"
+    "BaseUrl": "${GatewayBaseUrl}"
   }
 }

@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.EntityFrameworkCore;
-using ProductMicroservices.Grpc;
+
 using ProductMicroservices.Models;
 using ProductMicroservices.Repository;
 using SharedLibrary.Common;
@@ -28,7 +28,7 @@ builder.Services.AddDbContext<ProductDBContext>(options =>
 builder.Services.AddTransient<ProductRepository>();
 // JWT Authentication
 builder.Services.AddJwtAuthentication(builder.Configuration);
-builder.Services.AddGrpc();
+// Remove gRPC server registration; this service will expose HTTP REST endpoints instead
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
     {
@@ -74,7 +74,7 @@ builder.WebHost.ConfigureKestrel(options =>
         listenOptions.Protocols = HttpProtocols.Http1AndHttp2;
     });
 });
-
+builder.Services.AddRedisCache(builder.Configuration);
 var app = builder.Build();
 
 using (var scope = app.Services.CreateScope())
@@ -102,5 +102,5 @@ app.UseSwagger();
 app.UseSwaggerUI();
 app.UseAuthorization();
 app.MapControllers();
-app.MapGrpcService<ProductGrpcService>();
+
 app.Run();
