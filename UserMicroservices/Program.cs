@@ -2,7 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using UserMicroservices.Models;
 using UserMicroservices.Repository;
-using UserMicroservices.Grpc;
+
 using SharedLibrary.Common;
 using Microsoft.Extensions.Logging;
 
@@ -24,7 +24,7 @@ namespace UserMicroservices
             builder.Services.AddControllers();
             // JWT Authentication
             builder.Services.AddJwtAuthentication(builder.Configuration);
-            builder.Services.AddGrpc();
+            // Remove gRPC server registration; this service will expose HTTP REST endpoints instead
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen(c =>
             {
@@ -76,7 +76,7 @@ namespace UserMicroservices
                     listenOptions.Protocols = HttpProtocols.Http1AndHttp2;
                 });
             });
-
+            builder.Services.AddRedisCache(builder.Configuration);
             var app = builder.Build();
 
             // Logging
@@ -105,7 +105,7 @@ namespace UserMicroservices
             app.UseSwaggerUI();
             app.UseAuthorization();
             app.MapControllers();
-            app.MapGrpcService<UserGrpcService>();
+            // No gRPC services mapped - user service exposes REST controllers
             app.Run();
         }
     }

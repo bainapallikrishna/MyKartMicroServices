@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using MyKart.Contracts.Product;
+using System.Net.Http.Json;
 using PurchaseMicroservices.Models;
 using PurchaseMicroservices.Repository;
 
@@ -12,20 +12,17 @@ namespace PurchaseMicroservices.Controllers
     public class PurchaseController : ControllerBase
     {
         public readonly PurchaseRepository _purchaseRepository;
-        private readonly HttpClient _httpClient;
+        private readonly IHttpClientFactory _httpClientFactory;
         private readonly string? _productServiceUrl;
-        private readonly ProductGrpc.ProductGrpcClient _productGrpcClient;
 
         public PurchaseController(PurchaseRepository purchaseRepository,
              PurchaseDBContext context,
-             HttpClient httpClient,
-             IConfiguration configuration,
-             ProductGrpc.ProductGrpcClient productGrpcClient)
+             IHttpClientFactory httpClientFactory,
+             IConfiguration configuration)
         {
             _purchaseRepository = purchaseRepository;
-            _httpClient = httpClient;
+            _httpClientFactory = httpClientFactory;
             _productServiceUrl = configuration.GetValue<string>("ProductServiceUrl");
-            _productGrpcClient = productGrpcClient;
         }
         [HttpGet]
         public IActionResult GetAllProducts()
@@ -85,31 +82,44 @@ namespace PurchaseMicroservices.Controllers
             try
             {
                 double priceOfProduct = 0;
-                var priceReply = await _productGrpcClient.GetPriceAsync(new GetPriceRequest { ProductId = purchase.ProductId });
-                priceOfProduct = priceReply.Price;
+                var client = _httpClientFactory.CreateClient("PropagatingClient");
+
+                // Get price from Product service REST endpoint
+                var priceResponse = await client.GetAsync($"{_productServiceUrl}/api/Product/Price?productId={purchase.ProductId}");
+                if (!priceResponse.IsSuccessStatusCode)
+                {
+                    result = "Failed to fetch the price of the product";
+                    return new JsonResult(result);
+                }
+
+                priceOfProduct = await priceResponse.Content.ReadFromJsonAsync<double>();
                 if (priceOfProduct > 0)
                 {
-                    var updateReply = await _productGrpcClient.UpdateQuantityAsync(new UpdateQuantityRequest
+                    // Update quantity via Product service REST endpoint
+                    var updateResponse = await client.PutAsync($"{_productServiceUrl}/api/Product/Quantity?productId={purchase.ProductId}&quantityPurchased={purchase.QuantityPurchased}", null);
+                    if (updateResponse.IsSuccessStatusCode)
                     {
-                        ProductId = purchase.ProductId,
-                        QuantityPurchased = purchase.QuantityPurchased
-                    });
-
-                    if (updateReply.Result == 1)
-                    {
-                        purchase.TotalPrice = (decimal)(purchase.QuantityPurchased * priceOfProduct);
-                        status = await _purchaseRepository.AddPurchaseDetails(purchase);
-                        if (status == true)
+                        var updateResult = await updateResponse.Content.ReadFromJsonAsync<int>();
+                        if (updateResult == 1)
                         {
-                            result = "Successfully added purchase details!";
-                        }
-                        else if (status == false)
-                        {
-                            result = "Purchase details could not be added!";
+                            purchase.TotalPrice = (decimal)(purchase.QuantityPurchased * priceOfProduct);
+                            status = await _purchaseRepository.AddPurchaseDetails(purchase);
+                            if (status == true)
+                            {
+                                result = "Successfully added purchase details!";
+                            }
+                            else if (status == false)
+                            {
+                                result = "Purchase details could not be added!";
+                            }
+                            else
+                            {
+                                result = "Some error occurred while storing purchase details!";
+                            }
                         }
                         else
                         {
-                            result = "Some error occurred while storing purchase details!";
+                            result = "Some error occurred while updating the stock!";
                         }
                     }
                     else

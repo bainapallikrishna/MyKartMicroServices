@@ -1,5 +1,5 @@
 using Microsoft.EntityFrameworkCore;
-using MyKart.Contracts.Product;
+
 using PurchaseMicroservices.Models;
 using PurchaseMicroservices.Repository;
 using SharedLibrary.Common;
@@ -73,12 +73,7 @@ namespace PurchaseMicroservices
             // Named HttpClient that propagates Authorization header
             builder.Services.AddHttpClient("PropagatingClient").AddHttpMessageHandler<AuthorizationPropagationHandler>();
 
-            builder.Services.AddGrpcClient<ProductGrpc.ProductGrpcClient>(options =>
-            {
-                // ✅ Now reads correctly from Development or Docker config
-                var address = builder.Configuration.GetValue<string>("Grpc:ProductService");
-                options.Address = new Uri(address);
-            });
+            // gRPC client removed; calling Product service via HTTP REST using named HttpClient 'PropagatingClient'
 
             var app = builder.Build();
 

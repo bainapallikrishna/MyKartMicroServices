@@ -1,17 +1,51 @@
 ﻿using Ocelot.DependencyInjection;
 using Ocelot.Middleware;
 using SharedLibrary.Common;
+using System.IO;
+using System.Collections.Generic;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Logging.ClearProviders();
 builder.Logging.AddConsole();
 
-builder.Configuration
-    .AddJsonFile("ocelot.json", optional: true, reloadOnChange: true)
-    .AddJsonFile($"ocelot.{builder.Environment.EnvironmentName}.json",
-                  optional: true,
-                  reloadOnChange: true);
+
+    
+var templatePath = Path.Combine(builder.Environment.ContentRootPath, "ocelot.template.json");
+var generatedPath = Path.Combine(builder.Environment.ContentRootPath, "ocelot.generated.json");
+if (File.Exists(templatePath))
+{
+    var template = File.ReadAllText(templatePath);
+    var map = new Dictionary<string, string>
+    {
+        ["CategoryHost"] = Environment.GetEnvironmentVariable("CATEGORY_HOST") ?? builder.Configuration["Services:Category:Host"] ?? "localhost",
+        ["CategoryPort"] = Environment.GetEnvironmentVariable("CATEGORY_PORT") ?? builder.Configuration["Services:Category:Port"] ?? "5124",
+        ["ProductHost"] = Environment.GetEnvironmentVariable("PRODUCT_HOST") ?? builder.Configuration["Services:Product:Host"] ?? "localhost",
+        ["ProductPort"] = Environment.GetEnvironmentVariable("PRODUCT_PORT") ?? builder.Configuration["Services:Product:Port"] ?? "21464",
+        ["UserHost"] = Environment.GetEnvironmentVariable("USER_HOST") ?? builder.Configuration["Services:User:Host"] ?? "localhost",
+        ["UserPort"] = Environment.GetEnvironmentVariable("USER_PORT") ?? builder.Configuration["Services:User:Port"] ?? "35805",
+        ["PurchaseHost"] = Environment.GetEnvironmentVariable("PURCHASE_HOST") ?? builder.Configuration["Services:Purchase:Host"] ?? "localhost",
+        ["PurchasePort"] = Environment.GetEnvironmentVariable("PURCHASE_PORT") ?? builder.Configuration["Services:Purchase:Port"] ?? "47513",
+        ["GatewayBaseUrl"] = Environment.GetEnvironmentVariable("GATEWAY_BASEURL") ?? builder.Configuration["Gateway:BaseUrl"] ?? "http://localhost:5048"
+    };
+
+    foreach (var kv in map)
+    {
+        template = template.Replace("${" + kv.Key + "}", kv.Value);
+    }
+
+    File.WriteAllText(generatedPath, template);
+    builder.Configuration.AddJsonFile("ocelot.generated.json", optional: true, reloadOnChange: true);
+}
+else
+{
+    // Fall back to any existing environment-specific ocelot files
+    builder.Configuration
+        .AddJsonFile("ocelot.json", optional: true, reloadOnChange: true)
+        .AddJsonFile($"ocelot.{builder.Environment.EnvironmentName}.json",
+                      optional: true,
+                      reloadOnChange: true);
+}
 
 // Removed AddMyKartCors() - no such extension exists in the SharedLibrary. Register CORS below instead.
 builder.Services.AddEndpointsApiExplorer();
@@ -55,7 +89,7 @@ builder.Services.AddCors(options =>
             .AllowCredentials();
     });
 });
-
+builder.Services.AddRedisCache(builder.Configuration);
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
