@@ -40,19 +40,18 @@ public class AuthController : ControllerBase
         if (user == null)
             return Unauthorized();
 
-        // Check lockout
+     
         if (user.LockoutEnd.HasValue && user.LockoutEnd.Value > DateTime.UtcNow)
         {
-            return Forbid(); // user is locked out
+            return Forbid();
         }
 
-        // Compare hashed passwords
         var hashed = System.Convert.ToBase64String(System.Security.Cryptography.SHA256.Create()
             .ComputeHash(Encoding.UTF8.GetBytes(request.Password ?? string.Empty)));
 
         if (!string.Equals(hashed, user.UserPassword, StringComparison.Ordinal))
         {
-            // increment failed attempts
+         
             user.FailedLoginAttempts++;
             if (user.FailedLoginAttempts >= 5)
             {
@@ -63,7 +62,7 @@ public class AuthController : ControllerBase
             return Unauthorized();
         }
 
-        // reset failed attempts on success
+       
         user.FailedLoginAttempts = 0;
         user.LockoutEnd = null;
         _repo.UpdateUserDetails(user);
@@ -93,8 +92,7 @@ public class AuthController : ControllerBase
         if (user == null)
             return Unauthorized();
 
-        // Issue new tokens
-        // Remove old refresh token and create a new one
+      
         _refreshTokens.TryRemove(request.RefreshToken, out _);
         var authResult = CreateTokens(user);
 
@@ -128,7 +126,7 @@ public class AuthController : ControllerBase
         var token = tokenHandler.CreateToken(tokenDescriptor);
         var tokenString = tokenHandler.WriteToken(token);
 
-        // create refresh token
+       
         var refreshToken = Convert.ToBase64String(RandomNumberGenerator.GetBytes(64));
         var refreshInfo = new RefreshTokenInfo
         {
@@ -146,7 +144,7 @@ public class AuthController : ControllerBase
     }
 }
 
-// DTOs and helpers
+
 public record LoginRequest(string Email, string Password);
 public record RefreshRequest(string RefreshToken);
 

@@ -12,16 +12,15 @@ namespace CategoryMicroservices
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            // Configure logging to use console and ensure consistent logging across microservices
-            builder.Logging.ClearProviders();
-            builder.Logging.AddConsole();
-
             // ✅ Environment-aware config loading
             var env = builder.Environment.EnvironmentName;
             builder.Configuration
                 .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
                 .AddJsonFile($"appsettings.{env}.json", optional: true, reloadOnChange: true)
                 .AddEnvironmentVariables();
+
+            // Configure structured logging
+            builder.Services.AddStructuredLogging(builder.Configuration, "CategoryMicroservice");
 
             builder.Services.AddControllers();
             // JWT Authentication
@@ -77,7 +76,12 @@ namespace CategoryMicroservices
                 });
             });
             builder.Services.AddRedisCache(builder.Configuration);
+            // Register distributed cache wrapper so services can use ICacheService
+            builder.Services.AddSingleton<SharedLibrary.Common.ICacheService, SharedLibrary.Common.CacheService>();
             var app = builder.Build();
+
+            // Configure structured logging middleware
+            app.UseStructuredLogging();
 
             // Use centralized shared logging middleware
             app.UseSharedLogging();

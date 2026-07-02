@@ -10,10 +10,19 @@
     <DockerServiceName>apigateway</DockerServiceName>
   </PropertyGroup>
   <ItemGroup>
+    <None Include="CACHING_ARCHITECTURE.md" />
+    <None Include="CACHING_CHANGES_SUMMARY.md" />
+    <None Include="CACHING_IMPLEMENTATION.md" />
+    <None Include="CACHING_QUICK_REFERENCE.md" />
+    <None Include="DEPLOYMENT_CHECKLIST.md" />
     <None Include="docker-compose.override.yml">
       <DependentUpon>docker-compose.yml</DependentUpon>
     </None>
     <None Include="docker-compose.yml" />
     <None Include=".dockerignore" />
+    <None Include="DOCUMENTATION_INDEX.md" />
+    <None Include="FINAL_SUMMARY.md" />
+    <None Include="IMPLEMENTATION_COMPLETE.md" />
+    <None Include="README_CACHING.md" />
   </ItemGroup>
 </Project>

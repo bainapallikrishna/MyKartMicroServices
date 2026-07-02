@@ -7,16 +7,15 @@ using SharedLibrary.Common;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Configure logging providers
-builder.Logging.ClearProviders();
-builder.Logging.AddConsole();
-
 // ✅ Environment-aware config loading
 var env = builder.Environment.EnvironmentName;
 builder.Configuration
     .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
     .AddJsonFile($"appsettings.{env}.json", optional: true, reloadOnChange: true)
     .AddEnvironmentVariables();
+
+// Configure structured logging
+builder.Services.AddStructuredLogging(builder.Configuration, "ProductMicroservice");
 
 builder.Services.AddDbContext<ProductDBContext>(options =>
     options.UseLazyLoadingProxies()
@@ -75,7 +74,12 @@ builder.WebHost.ConfigureKestrel(options =>
     });
 });
 builder.Services.AddRedisCache(builder.Configuration);
+// Register ICacheService implementation for distributed caching
+builder.Services.AddSingleton<SharedLibrary.Common.ICacheService, SharedLibrary.Common.CacheService>();
 var app = builder.Build();
+
+// Configure structured logging middleware
+app.UseStructuredLogging();
 
 using (var scope = app.Services.CreateScope())
 {

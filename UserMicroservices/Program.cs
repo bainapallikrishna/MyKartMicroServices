@@ -13,14 +13,16 @@ namespace UserMicroservices
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
-            // Configure console logging and clear default providers to ensure consistent logging behavior
-            builder.Logging.ClearProviders();
-            builder.Logging.AddConsole();
+
             var env = builder.Environment.EnvironmentName;
             builder.Configuration
                 .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
                 .AddJsonFile($"appsettings.{env}.json", optional: true, reloadOnChange: true)
                 .AddEnvironmentVariables();
+
+            // Configure structured logging
+            builder.Services.AddStructuredLogging(builder.Configuration, "UserMicroservice");
+
             builder.Services.AddControllers();
             // JWT Authentication
             builder.Services.AddJwtAuthentication(builder.Configuration);
@@ -77,7 +79,12 @@ namespace UserMicroservices
                 });
             });
             builder.Services.AddRedisCache(builder.Configuration);
+            // Register ICacheService implementation for distributed caching
+            builder.Services.AddSingleton<SharedLibrary.Common.ICacheService, SharedLibrary.Common.CacheService>();
             var app = builder.Build();
+
+            // Configure structured logging middleware
+            app.UseStructuredLogging();
 
             // Logging
             app.UseSharedLogging();
