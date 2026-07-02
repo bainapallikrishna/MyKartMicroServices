@@ -12,11 +12,6 @@ namespace PurchaseMicroservices
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            // Configure logging to use console and clear default providers
-            builder.Logging.ClearProviders();
-            builder.Logging.AddConsole();
-
-      
             AppContext.SetSwitch("System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport", true);
 
             // ✅ Environment-aware config loading
@@ -25,6 +20,9 @@ namespace PurchaseMicroservices
                 .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
                 .AddJsonFile($"appsettings.{env}.json", optional: true, reloadOnChange: true)
                 .AddEnvironmentVariables();
+
+            // Configure structured logging
+            builder.Services.AddStructuredLogging(builder.Configuration, "PurchaseMicroservice");
 
             builder.Services.AddControllers();
             builder.Services.AddHttpContextAccessor();
@@ -73,9 +71,17 @@ namespace PurchaseMicroservices
             // Named HttpClient that propagates Authorization header
             builder.Services.AddHttpClient("PropagatingClient").AddHttpMessageHandler<AuthorizationPropagationHandler>();
 
+            // Redis Cache Configuration
+            builder.Services.AddRedisCache(builder.Configuration);
+            // Register ICacheService implementation for distributed caching
+            builder.Services.AddSingleton<SharedLibrary.Common.ICacheService, SharedLibrary.Common.CacheService>();
+
             // gRPC client removed; calling Product service via HTTP REST using named HttpClient 'PropagatingClient'
 
             var app = builder.Build();
+
+            // Configure structured logging middleware
+            app.UseStructuredLogging();
 
             using (var scope = app.Services.CreateScope())
             {

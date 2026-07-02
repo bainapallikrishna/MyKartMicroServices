@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using System.Net.Http.Json;
 using PurchaseMicroservices.Models;
 using PurchaseMicroservices.Repository;
+using SharedLibrary.Common;
 
 namespace PurchaseMicroservices.Controllers
 {
@@ -25,6 +26,7 @@ namespace PurchaseMicroservices.Controllers
             _productServiceUrl = configuration.GetValue<string>("ProductServiceUrl");
         }
         [HttpGet]
+        [Cacheable(durationInSeconds: 300)]
         public IActionResult GetAllProducts()
         {
             var listOfPurchase = _purchaseRepository.GetAllProducts();
@@ -32,6 +34,7 @@ namespace PurchaseMicroservices.Controllers
         }
 
         [HttpPost("product")]
+        [InvalidateCache("purchase:*")]
         public IActionResult AddNewProduct(Purchase purchase)
         {
             bool status = _purchaseRepository.AddNewProduct(purchase);
@@ -45,6 +48,7 @@ namespace PurchaseMicroservices.Controllers
             }
         }
         [HttpPut("product")]
+        [InvalidateCache("purchase:*")]
         public IActionResult UpdateProductDetails(Purchase purchase)
         {
             int status = _purchaseRepository.UpdateProductDetails(purchase);
@@ -62,6 +66,7 @@ namespace PurchaseMicroservices.Controllers
             }
         }
         [HttpDelete("product")]
+        [InvalidateCache("purchase:*")]
         public IActionResult DeleteProduct(string PurchaseId)
         {
             bool status = _purchaseRepository.DeleteProduct(PurchaseId);
@@ -75,6 +80,7 @@ namespace PurchaseMicroservices.Controllers
             }
         }
         [HttpPost("purchaseProduct")]
+        [InvalidateCache("purchase:*", "product:*")]
         public async Task<JsonResult> AddPurchase(Purchase purchase)
         {
             string result = "";

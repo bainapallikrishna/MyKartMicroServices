@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Http;
 using CategoryMicroservices.Models;
 using CategoryMicroservices.Repository;
+using SharedLibrary.Common;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -20,6 +21,7 @@ namespace CategoryMicroservices.Controllers
         }
 
         [HttpGet]
+        [Cacheable(durationInSeconds: 300)]
         public JsonResult GetAllCategoriesDetails()
         {
             List<Category> listOfCategories = repository.GetAllCategories();
@@ -27,6 +29,7 @@ namespace CategoryMicroservices.Controllers
         }
 
         [HttpGet("{id}")]
+        [Cacheable(durationInSeconds: 300)]
         public JsonResult GetCategoryById(byte id)
         {
             List<Category> listOfCategories = repository.GetAllCategories();
@@ -35,12 +38,14 @@ namespace CategoryMicroservices.Controllers
         }
 
         [HttpPost]
+        [InvalidateCache("category:*")]
         public JsonResult AddNewCategory(Category category)
         {
             return Json(repository.AddNewCategory(category));
         }
 
         [HttpPut]
+        [InvalidateCache("category:*")]
         public JsonResult UpdateCategory(Category category)
         {
             int result = repository.UpdateCategoryDetails(category);
@@ -48,6 +53,7 @@ namespace CategoryMicroservices.Controllers
         }
 
         [HttpDelete]
+        [InvalidateCache("category:*")]
         public JsonResult DeleteCategory(byte categoryId)
         {
             bool result = repository.DeleteCategory(categoryId);

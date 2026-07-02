@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
+using SharedLibrary.Common;
 
 namespace ProductMicroservices.Controllers
 {
@@ -15,6 +16,7 @@ namespace ProductMicroservices.Controllers
             _productRepository = productRepository;
         }
         [HttpGet]
+        [Cacheable(durationInSeconds: 300)]
         public async Task<JsonResult> GetAllProducts()
         {
             List<Models.Product> listOfProducts = _productRepository.GetAllProducts();
@@ -23,6 +25,7 @@ namespace ProductMicroservices.Controllers
             return Json(listOfProducts);
         }
         [HttpGet("{id}")]
+        [Cacheable(durationInSeconds: 300)]
         public JsonResult GetProductById(string id)
         {
             Models.Product product = _productRepository.GetProductById(id);
@@ -36,6 +39,7 @@ namespace ProductMicroservices.Controllers
             }
         }
         [HttpPost]
+        [InvalidateCache("product:*")]
         public JsonResult AddNewProduct(Models.Product product)
         {
             bool status = _productRepository.AddNewProduct(product);
@@ -49,6 +53,7 @@ namespace ProductMicroservices.Controllers
             }
         }
         [HttpPut]
+        [InvalidateCache("product:*")]
         public JsonResult UpdateProductDetails(Models.Product product)
         {
             int status = _productRepository.UpdateProductDetails(product);
@@ -66,6 +71,7 @@ namespace ProductMicroservices.Controllers
             }
         }
         [HttpDelete]
+        [InvalidateCache("product:*")]
         public JsonResult DeleteProduct(string id)
         {
             bool status = _productRepository.DeleteProduct(id);
@@ -79,12 +85,14 @@ namespace ProductMicroservices.Controllers
             }
         }
         [HttpGet("Price")]
+        [Cacheable(durationInSeconds: 300)]
         public async Task<JsonResult> GetPrice(string productId)
         {
             decimal result = await _productRepository.GetPrice(productId);
             return Json(result);
         }
         [HttpPut("Quantity")]
+        [InvalidateCache("product:*")]
         public async Task<JsonResult> UpdateQuantity(string productId, int quantityPurchased)
         {
             int result = await _productRepository.UpdateQuantity(productId, quantityPurchased);
