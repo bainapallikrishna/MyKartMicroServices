@@ -25,7 +25,8 @@ namespace SharedLibrary.Common
                 : GenerateCorrelationId();
 
             context.Items[LoggingConstants.CorrelationIdProperty] = correlationId;
-            context.Response.Headers.Add(LoggingConstants.CorrelationIdHeader, correlationId);
+            // Use indexer to set or overwrite header instead of Add which throws if header already exists
+            context.Response.Headers[LoggingConstants.CorrelationIdHeader] = correlationId;
 
             await _next(context);
         }

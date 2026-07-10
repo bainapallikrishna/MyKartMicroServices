@@ -35,7 +35,7 @@ if (File.Exists(templatePath))
     }
 
     File.WriteAllText(generatedPath, template);
-    builder.Configuration.AddJsonFile("ocelot.generated.json", optional: true, reloadOnChange: true);
+    builder.Configuration.AddJsonFile("ocelot.Development.json", optional: true, reloadOnChange: true);
 }
 else
 {

@@ -22,7 +22,7 @@
         }
       ],
       "UpstreamPathTemplate": "/user/api/UserMicroservices",
-      "UpstreamHttpMethod": [ "POST" ]
+      "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ]
     },
     {
       "DownstreamPathTemplate": "/api/{everything}",
@@ -77,12 +77,16 @@
       "SwaggerKey": "PurchaseService"
     }
   ],
+  "GlobalConfiguration": {
+    "BaseUrl": "http://localhost:5048"
+  }
+  ,
   "SwaggerEndPoints": [
     {
       "Key": "CategoryService",
       "Config": [
         {
-          "Name": "Category Service",
+          "Name": "Category API",
           "Version": "v1",
           "Url": "http://localhost:5124/swagger/v1/swagger.json"
         }
@@ -92,7 +96,7 @@
       "Key": "ProductService",
       "Config": [
         {
-          "Name": "Product Service",
+          "Name": "Product API",
           "Version": "v1",
           "Url": "http://localhost:21464/swagger/v1/swagger.json"
         }
@@ -102,7 +106,7 @@
       "Key": "UserService",
       "Config": [
         {
-          "Name": "User Service",
+          "Name": "User API",
           "Version": "v1",
           "Url": "http://localhost:35805/swagger/v1/swagger.json"
         }
@@ -112,14 +116,11 @@
       "Key": "PurchaseService",
       "Config": [
         {
-          "Name": "Purchase Service",
+          "Name": "Purchase API",
           "Version": "v1",
           "Url": "http://localhost:47513/swagger/v1/swagger.json"
         }
       ]
     }
-  ],
-  "GlobalConfiguration": {
-    "BaseUrl": "http://localhost:5048"
-  }
+  ]
 }

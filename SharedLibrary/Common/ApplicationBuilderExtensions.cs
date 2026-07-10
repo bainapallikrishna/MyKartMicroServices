@@ -16,6 +16,8 @@ public static class ApplicationBuilderExtensions
 
     public static IApplicationBuilder UseSharedLogging(this IApplicationBuilder app)
     {
+        // Correlation id should be added before any logging/exception handling so it is available in logs
+        app.UseMiddleware<CorrelationIdMiddleware>();
         app.UseMiddleware<GlobalExceptionMiddleware>();
         app.UseMiddleware<RequestLoggingMiddleware>();
         return app;
