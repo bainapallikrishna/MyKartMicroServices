@@ -26,7 +26,12 @@ public sealed class GlobalExceptionMiddleware
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Unhandled exception");
+            // Try to obtain correlation id from context (set by CorrelationIdMiddleware) or request header
+            var correlationId = context.Items.ContainsKey(LoggingConstants.CorrelationIdProperty)
+                ? context.Items[LoggingConstants.CorrelationIdProperty]?.ToString()
+                : (context.Request.Headers.TryGetValue(LoggingConstants.CorrelationIdHeader, out var headerVal) ? headerVal.ToString() : null);
+
+            _logger.LogError(ex, "{Message} - CorrelationId: {CorrelationId}", LoggingConstants.UnhandledException, correlationId);
 
             if (!context.Response.HasStarted)
             {
@@ -34,12 +39,11 @@ public sealed class GlobalExceptionMiddleware
                 context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
                 context.Response.ContentType = "application/json";
 
-                var payload = JsonSerializer.Serialize(new { message = "Internal server error" });
+                var payload = JsonSerializer.Serialize(new { message = "Internal server error", correlationId });
                 await context.Response.WriteAsync(payload);
             }
 
-  
-        return;
+            return;
         }
     }
 }

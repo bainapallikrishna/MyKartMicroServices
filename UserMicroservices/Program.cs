@@ -4,6 +4,7 @@ using UserMicroservices.Models;
 using UserMicroservices.Repository;
 
 using SharedLibrary.Common;
+using SharedLibrary.CQRS;
 using Microsoft.Extensions.Logging;
 
 namespace UserMicroservices
@@ -70,6 +71,11 @@ namespace UserMicroservices
                    )
                ));
             builder.Services.AddScoped<UserRepository>();
+            // Register CQRS dispatcher and handlers
+            builder.Services.AddInMemoryDispatcher();
+            // Register handlers
+            builder.Services.AddScoped<SharedLibrary.CQRS.IRequestHandler<UserMicroservices.CQRS.Commands.CreateUserCommand, bool>, UserMicroservices.CQRS.Handlers.CreateUserCommandHandler>();
+            builder.Services.AddScoped<SharedLibrary.CQRS.IRequestHandler<UserMicroservices.CQRS.Queries.GetAllUsersQuery, System.Collections.Generic.List<UserMicroservices.Models.User>>, UserMicroservices.CQRS.Handlers.GetAllUsersQueryHandler>();
 
             builder.WebHost.ConfigureKestrel(options =>
             {
@@ -111,6 +117,10 @@ namespace UserMicroservices
             app.UseSwagger();
             app.UseSwaggerUI();
             app.UseAuthorization();
+            // Initialize CQRS dispatcher mappings after DI container built
+            var dispatcher = app.Services.GetRequiredService<SharedLibrary.CQRS.InMemoryDispatcher>();
+            dispatcher.RegisterHandler<UserMicroservices.CQRS.Commands.CreateUserCommand, bool, UserMicroservices.CQRS.Handlers.CreateUserCommandHandler>();
+            dispatcher.RegisterHandler<UserMicroservices.CQRS.Queries.GetAllUsersQuery, System.Collections.Generic.List<UserMicroservices.Models.User>, UserMicroservices.CQRS.Handlers.GetAllUsersQueryHandler>();
             app.MapControllers();
             // No gRPC services mapped - user service exposes REST controllers
             app.Run();

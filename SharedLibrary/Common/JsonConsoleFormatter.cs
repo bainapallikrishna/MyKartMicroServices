@@ -21,18 +21,43 @@ namespace SharedLibrary.Common
             IExternalScopeProvider scopeProvider,
             TextWriter textWriter)
         {
+            // Convert State to a safe string representation to avoid reflecting into
+            // platform-sensitive types (e.g. EndPoint) that can throw during serialization.
+            string safeState = logEntry.State?.ToString();
+
             var logRecord = new
             {
                 Timestamp = DateTime.UtcNow.ToString("O"),
                 Level = logEntry.LogLevel.ToString(),
                 Category = logEntry.Category,
                 EventId = logEntry.EventId.Id,
-                Message = logEntry.Formatter(logEntry.State, logEntry.Exception),
+                Message = logEntry.Formatter?.Invoke(logEntry.State, logEntry.Exception),
                 Exception = logEntry.Exception?.ToString(),
-                State = logEntry.State
+                State = safeState
             };
 
-            var json = JsonSerializer.Serialize(logRecord, new JsonSerializerOptions { WriteIndented = false });
+            string json;
+            try
+            {
+                json = JsonSerializer.Serialize(logRecord, new JsonSerializerOptions { WriteIndented = false });
+            }
+            catch (Exception)
+            {
+                // Fallback: avoid including State or other problematic members
+                var fallback = new
+                {
+                    logRecord.Timestamp,
+                    logRecord.Level,
+                    logRecord.Category,
+                    logRecord.EventId,
+                    logRecord.Message,
+                    logRecord.Exception,
+                    State = safeState ?? string.Empty
+                };
+
+                json = JsonSerializer.Serialize(fallback, new JsonSerializerOptions { WriteIndented = false });
+            }
+
             textWriter.WriteLine(json);
         }
 

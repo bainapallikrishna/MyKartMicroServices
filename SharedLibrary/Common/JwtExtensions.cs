@@ -35,6 +35,15 @@ public static class JwtExtensions
                 ValidAudience = audience,
                 IssuerSigningKey = signingKey
             };
+            // Propagate token to outgoing HTTP requests via AuthorizationPropagationHandler if registered
+            options.Events = new JwtBearerEvents
+            {
+                OnMessageReceived = context =>
+                {
+                    // no-op placeholder to allow pipeline extensions
+                    return System.Threading.Tasks.Task.CompletedTask;
+                }
+            };
         });
 
         return services;

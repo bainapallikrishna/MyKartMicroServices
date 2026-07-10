@@ -38,7 +38,10 @@ namespace UserMicroservices.Controllers
                 try
                 {
                     _logger.LogInformation("Fetching all users - CorrelationId: {CorrelationId}", correlationId);
-                    List<User> listOfUsers = _repository.GetAllUsers();
+                    // Use CQRS query
+                    var query = new UserMicroservices.CQRS.Queries.GetAllUsersQuery();
+                    var dispatcher = HttpContext.RequestServices.GetService(typeof(SharedLibrary.CQRS.IDispatcher)) as SharedLibrary.CQRS.IDispatcher;
+                    var listOfUsers = dispatcher.Send<UserMicroservices.CQRS.Queries.GetAllUsersQuery, System.Collections.Generic.List<User>>(query).GetAwaiter().GetResult();
                     perfLogger.LogSuccess();
                     _logger.LogInformation("Successfully fetched {UserCount} users - CorrelationId: {CorrelationId}", listOfUsers?.Count ?? 0, correlationId);
                     return Json(listOfUsers);
@@ -88,7 +91,9 @@ namespace UserMicroservices.Controllers
                 try
                 {
                     _logger.LogInformation("Adding new user with email: {UserEmail} - CorrelationId: {CorrelationId}", user?.EmailId ?? "unknown", correlationId);
-                    var result = _repository.AddNewUser(user);
+                    var command = new UserMicroservices.CQRS.Commands.CreateUserCommand { User = user };
+                    var dispatcher = HttpContext.RequestServices.GetService(typeof(SharedLibrary.CQRS.IDispatcher)) as SharedLibrary.CQRS.IDispatcher;
+                    var result = dispatcher.Send<UserMicroservices.CQRS.Commands.CreateUserCommand, bool>(command).GetAwaiter().GetResult();
                     perfLogger.LogSuccess();
                     _logger.LogInformation("User added successfully with email: {UserEmail} - CorrelationId: {CorrelationId}", user?.EmailId, correlationId);
                     return Json(result);
