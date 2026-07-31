@@ -57,7 +57,7 @@ namespace PurchaseMicroservices.Repository
             }
             return status;
         }
-        public bool DeleteProduct(string PurchaseId)
+        public bool DeleteProduct(int PurchaseId)
         {
             bool status = false;
             Purchase purchase = _context.Purchases.Find(PurchaseId);

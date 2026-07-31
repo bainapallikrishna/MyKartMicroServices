@@ -20,5 +20,6 @@ namespace SharedLibrary.Common
         {
             CacheKeyPatterns = cacheKeyPatterns ?? Array.Empty<string>();
         }
+        public string? CacheKeyPrefix { get; set; }
     }
 }

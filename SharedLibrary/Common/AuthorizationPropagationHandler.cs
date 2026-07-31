@@ -17,7 +17,7 @@ public class AuthorizationPropagationHandler : DelegatingHandler
         var context = _httpContextAccessor.HttpContext;
         if (context != null && context.Request.Headers.TryGetValue("Authorization", out var auth) && !string.IsNullOrEmpty(auth))
         {
-            // replace existing Authorization header
+      
             request.Headers.Authorization = AuthenticationHeaderValue.Parse(auth.ToString());
         }
 

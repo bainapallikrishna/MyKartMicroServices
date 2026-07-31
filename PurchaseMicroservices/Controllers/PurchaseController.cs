@@ -67,7 +67,7 @@ namespace PurchaseMicroservices.Controllers
         }
         [HttpDelete("product")]
         [InvalidateCache("purchase:*")]
-        public IActionResult DeleteProduct(string PurchaseId)
+        public IActionResult DeleteProduct(int PurchaseId)
         {
             bool status = _purchaseRepository.DeleteProduct(PurchaseId);
             if (status)
