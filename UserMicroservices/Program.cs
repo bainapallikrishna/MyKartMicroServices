@@ -21,13 +21,13 @@ namespace UserMicroservices
                 .AddJsonFile($"appsettings.{env}.json", optional: true, reloadOnChange: true)
                 .AddEnvironmentVariables();
 
-            // Configure structured logging
+
             builder.Services.AddStructuredLogging(builder.Configuration, "UserMicroservice");
 
             builder.Services.AddControllers();
-            // JWT Authentication
+
             builder.Services.AddJwtAuthentication(builder.Configuration);
-            // Remove gRPC server registration; this service will expose HTTP REST endpoints instead
+
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen(c =>
             {
@@ -57,7 +57,7 @@ namespace UserMicroservices
                 });
             });
 
-            // Register context accessor and propagation handler outside of the SwaggerGen options
+
             builder.Services.AddHttpContextAccessor();
             builder.Services.AddTransient<AuthorizationPropagationHandler>();
             builder.Services.AddHttpClient("PropagatingClient").AddHttpMessageHandler<AuthorizationPropagationHandler>();
@@ -71,9 +71,9 @@ namespace UserMicroservices
                    )
                ));
             builder.Services.AddScoped<UserRepository>();
-            // Register CQRS dispatcher and handlers
+
             builder.Services.AddInMemoryDispatcher();
-            // Register handlers
+      
             builder.Services.AddScoped<SharedLibrary.CQRS.IRequestHandler<UserMicroservices.CQRS.Commands.CreateUserCommand, bool>, UserMicroservices.CQRS.Handlers.CreateUserCommandHandler>();
             builder.Services.AddScoped<SharedLibrary.CQRS.IRequestHandler<UserMicroservices.CQRS.Queries.GetAllUsersQuery, System.Collections.Generic.List<UserMicroservices.Models.User>>, UserMicroservices.CQRS.Handlers.GetAllUsersQueryHandler>();
 
@@ -85,17 +85,17 @@ namespace UserMicroservices
                 });
             });
             builder.Services.AddRedisCache(builder.Configuration);
-            // Register ICacheService implementation for distributed caching
+
             builder.Services.AddSingleton<SharedLibrary.Common.ICacheService, SharedLibrary.Common.CacheService>();
             var app = builder.Build();
 
-            // Configure structured logging middleware
+   
             app.UseStructuredLogging();
 
-            // Logging
+        
             app.UseSharedLogging();
 
-            // ✅ Auto migrate on startup — same as CategoryService
+    
             using (var scope = app.Services.CreateScope())
             {
                 var services = scope.ServiceProvider;
@@ -117,12 +117,12 @@ namespace UserMicroservices
             app.UseSwagger();
             app.UseSwaggerUI();
             app.UseAuthorization();
-            // Initialize CQRS dispatcher mappings after DI container built
+     
             var dispatcher = app.Services.GetRequiredService<SharedLibrary.CQRS.InMemoryDispatcher>();
             dispatcher.RegisterHandler<UserMicroservices.CQRS.Commands.CreateUserCommand, bool, UserMicroservices.CQRS.Handlers.CreateUserCommandHandler>();
             dispatcher.RegisterHandler<UserMicroservices.CQRS.Queries.GetAllUsersQuery, System.Collections.Generic.List<UserMicroservices.Models.User>, UserMicroservices.CQRS.Handlers.GetAllUsersQueryHandler>();
             app.MapControllers();
-            // No gRPC services mapped - user service exposes REST controllers
+
             app.Run();
         }
     }

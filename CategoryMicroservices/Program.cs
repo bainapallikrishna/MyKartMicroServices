@@ -12,23 +12,23 @@ namespace CategoryMicroservices
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            // ✅ Environment-aware config loading
+     
             var env = builder.Environment.EnvironmentName;
             builder.Configuration
                 .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
                 .AddJsonFile($"appsettings.{env}.json", optional: true, reloadOnChange: true)
                 .AddEnvironmentVariables();
 
-            // Configure structured logging
+     
             builder.Services.AddStructuredLogging(builder.Configuration, "CategoryMicroservice");
 
             builder.Services.AddControllers();
-            // JWT Authentication
+        
             builder.Services.AddJwtAuthentication(builder.Configuration);
             builder.Services.AddGrpc();
             builder.Services.AddEndpointsApiExplorer();
 
-            // Register context accessor and propagation handler before building the container
+    
             builder.Services.AddHttpContextAccessor();
             builder.Services.AddTransient<AuthorizationPropagationHandler>();
             builder.Services.AddHttpClient("PropagatingClient").AddHttpMessageHandler<AuthorizationPropagationHandler>();
@@ -66,6 +66,7 @@ namespace CategoryMicroservices
                     sqlOptions => sqlOptions.EnableRetryOnFailure(5, TimeSpan.FromSeconds(30), null)
                 ));
 
+
             builder.Services.AddScoped<CategoryRepository>();
 
             builder.WebHost.ConfigureKestrel(options =>
@@ -76,14 +77,14 @@ namespace CategoryMicroservices
                 });
             });
             builder.Services.AddRedisCache(builder.Configuration);
-            // Register distributed cache wrapper so services can use ICacheService
+        
             builder.Services.AddSingleton<SharedLibrary.Common.ICacheService, SharedLibrary.Common.CacheService>();
             var app = builder.Build();
 
-            // Configure structured logging middleware
+  
             app.UseStructuredLogging();
 
-            // Use centralized shared logging middleware
+
             app.UseSharedLogging();
             using (var scope = app.Services.CreateScope())
             {

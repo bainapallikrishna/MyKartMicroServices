@@ -39,7 +39,7 @@ if (File.Exists(templatePath))
 }
 else
 {
-    // Fall back to any existing environment-specific ocelot files
+
     builder.Configuration
         .AddJsonFile("ocelot.json", optional: true, reloadOnChange: true)
         .AddJsonFile($"ocelot.{builder.Environment.EnvironmentName}.json",
@@ -47,7 +47,7 @@ else
                       reloadOnChange: true);
 }
 
-// Removed AddMyKartCors() - no such extension exists in the SharedLibrary. Register CORS below instead.
+
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerForOcelot(builder.Configuration);
 builder.Services.AddSwaggerGen(c =>
@@ -77,7 +77,7 @@ builder.Services.AddSwaggerGen(c =>
 });
 builder.Services.AddOcelot(builder.Configuration);
 builder.Services.AddJwtAuthentication(builder.Configuration);
-// CORS - allow requests from browser clients (adjust for production)
+
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AngularPolicy", policy =>

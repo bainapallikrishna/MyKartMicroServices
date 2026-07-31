@@ -76,6 +76,18 @@ builder.WebHost.ConfigureKestrel(options =>
 builder.Services.AddRedisCache(builder.Configuration);
 // Register ICacheService implementation for distributed caching
 builder.Services.AddSingleton<SharedLibrary.Common.ICacheService, SharedLibrary.Common.CacheService>();
+// Register caching filter to process Cacheable and InvalidateCache attributes
+builder.Services.AddScoped<SharedLibrary.Common.CachingFilter>();
+builder.Services.AddControllers(options =>
+{
+    options.Filters.AddService<SharedLibrary.Common.CachingFilter>();
+})
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.ReferenceHandler =
+            System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles;
+    });
+
 var app = builder.Build();
 
 // Configure structured logging middleware

@@ -14,6 +14,7 @@
     <None Include="CACHING_CHANGES_SUMMARY.md" />
     <None Include="CACHING_IMPLEMENTATION.md" />
     <None Include="CACHING_QUICK_REFERENCE.md" />
+    <None Include="CONSOLE_CHEAT_SHEET.md" />
     <None Include="DEPLOYMENT_CHECKLIST.md" />
     <None Include="docker-compose.override.yml">
       <DependentUpon>docker-compose.yml</DependentUpon>
@@ -23,6 +24,15 @@
     <None Include="DOCUMENTATION_INDEX.md" />
     <None Include="FINAL_SUMMARY.md" />
     <None Include="IMPLEMENTATION_COMPLETE.md" />
+    <None Include="INDEX.md" />
+    <None Include="QUICK_START.md" />
     <None Include="README_CACHING.md" />
+    <None Include="README_TOKEN_FLOW.md" />
+    <None Include="REFRESH_TOKEN_VALIDATION_VISUAL.md" />
+    <None Include="START_HERE.md" />
+    <None Include="TOKEN_FLOW_DEBUGGING_GUIDE.md" />
+    <None Include="TOKEN_FLOW_POINT_BY_POINT.md" />
+    <None Include="TOKEN_FLOW_VISUAL_DIAGRAMS.md" />
+    <None Include="VERIFICATION_COMPLETE.md" />
   </ItemGroup>
 </Project>
